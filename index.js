@@ -1,0 +1,819 @@
+require('dotenv').config();
+const fs = require('fs');
+const axios = require('axios');
+const cheerio = require('cheerio');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { createCanvas, loadImage } = require('canvas');
+const FormData = require('form-data');
+
+// Initialize Gemini client and model
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const geminiModel = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
+
+// Category ID mapping for WordPress REST API
+const CATEGORY_MAP = {
+  sports: 2,
+  entertainment: 3
+};
+
+// Global in-memory cache for taxonomies
+const wpCategoriesMap = new Map(); // name (lowercase) -> id
+const wpTagsMap = new Map(); // name (lowercase) -> id
+
+/**
+ * Preloads all existing categories and tags from WordPress into local memory.
+ */
+async function preloadWordPressTaxonomies() {
+  console.log('[Info] Preloading WordPress taxonomies into memory...');
+  try {
+    if (!process.env.WP_USERNAME || !process.env.WP_APP_PASSWORD || !process.env.WP_URL) {
+      throw new Error("Missing required WordPress environment variables (WP_USERNAME, WP_APP_PASSWORD, or WP_URL)");
+    }
+    const credentials = `${process.env.WP_USERNAME}:${process.env.WP_APP_PASSWORD}`;
+    const token = Buffer.from(credentials).toString('base64');
+    const headers = { 'Authorization': `Basic ${token}` };
+    const wpBaseUrl = process.env.WP_URL.replace(/\/$/, '');
+
+    const [catResp, tagResp] = await Promise.all([
+      axios.get(`${wpBaseUrl}/wp-json/wp/v2/categories?per_page=100`, { headers }),
+      axios.get(`${wpBaseUrl}/wp-json/wp/v2/tags?per_page=100`, { headers })
+    ]);
+
+    const categories = catResp.data || [];
+    categories.forEach(cat => wpCategoriesMap.set(cat.name.toLowerCase(), cat.id));
+
+    const tags = tagResp.data || [];
+    tags.forEach(tag => wpTagsMap.set(tag.name.toLowerCase(), tag.id));
+
+    console.log(`[Info] Preloaded ${wpCategoriesMap.size} categories and ${wpTagsMap.size} tags.`);
+  } catch (error) {
+    console.error(`[Error] Failed to preload taxonomies: ${error.message}`);
+  }
+}
+
+/**
+ * Helper function to pause execution for a given number of milliseconds
+ * @param {number} ms - Milliseconds to delay
+ */
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+/**
+ * Scrapes the text content of a single news article URL using axios and cheerio.
+ * Selects all <p> (paragraph) tags and returns the clean text and word count.
+ * @param {string} url - The article URL to visit
+ * @returns {Promise<{text: string, wordCount: number, status: string, image1: string, image2: string}>}
+ */
+async function scrapeArticleText(url) {
+  try {
+    const response = await axios.get(url, {
+      timeout: 12000,
+      maxRedirects: 10,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5'
+      }
+    });
+
+    const $ = cheerio.load(response.data);
+
+    // Extract main Open Graph image and article body image BEFORE removing DOM elements
+    const image1 = $('meta[property="og:image"]').attr('content') || '';
+    let image2 = $('article img').first().attr('src') || $('img').eq(1).attr('src') || '';
+
+    if (!image2) {
+      image2 = image1;
+    }
+
+    // Remove irrelevant elements before extracting paragraph text
+    $('script, style, nav, footer, header, aside, iframe, noscript').remove();
+
+    // Extract text from all <p> tags
+    const paragraphs = [];
+    $('p').each((_, element) => {
+      const text = $(element).text().trim();
+      if (text.length > 20) {
+        paragraphs.push(text);
+      }
+    });
+
+    const fullText = paragraphs.join('\n\n');
+    const wordCount = fullText ? fullText.split(/\s+/).filter(Boolean).length : 0;
+    
+    const status = wordCount >= 500 
+      ? `Meets requirement (${wordCount} words >= 500)` 
+      : `Under 500 words (${wordCount} words)`;
+
+    return { text: fullText, wordCount, status, image1, image2 };
+  } catch (error) {
+    const errMsg = error.response 
+      ? `HTTP Status ${error.response.status} (${error.response.statusText})` 
+      : error.message;
+    return { 
+      text: `[Failed to scrape article from ${url}: ${errMsg}]`, 
+      wordCount: 0, 
+      status: `Error: ${errMsg}`,
+      image1: '',
+      image2: ''
+    };
+  }
+}
+
+/**
+ * Sends combined scraped text to Gemini to generate 2 distinct SEO-optimized articles with category names.
+ * @param {string} topicTitle - The name/title of the trending topic
+ * @param {string} scrapedText - Combined text scraped from associated articles
+ * @returns {Promise<string>} The generated response text from Gemini
+ */
+async function generateArticles(topicTitle, scrapedText) {
+  const prompt = `You are an elite Copywriter and Senior Editor. Your goal is to maximize traffic, reader retention, and search engine rankings using psychological triggers and the 7 C's of communication.
+I have scraped news about the trending topic: "${topicTitle}". Extracted text:
+${scrapedText}
+
+Write a high-quality news article based on the provided text.
+
+STRICT INSTRUCTIONS:
+- Keyword Generation First: Generate a strict 1-2 word focus_keyword.
+- Forced Exact String Match (Zero Tolerance): You MUST use this EXACT 1-2 word string, character-for-character, in:
+  1. title: The title MUST strictly start with the exact focus_keyword, followed by a colon (:), and it MUST contain a number. Inject Power & Sentiment Words (NEW): The title MUST organically include at least ONE recognized 'Power Word' (e.g., Secret, Shocking, Ultimate, Proven, Massive, Unbelievable) AND at least ONE 'Sentiment Word' (e.g., Best, Worst, Heartbreaking, Inspiring, Tragic, Beautiful, Triumphant). Example Format: '[Focus Keyword]: 7 [Power Word] Secrets Behind This [Sentiment Word] Event'. Example Output: 'Lewis Hamilton: 5 Shocking Details About His Heartbreaking Defeat'. Do not place the focus keyword in the middle or end of the title.
+  2. seo_description: The very first words of this description MUST be the exact focus_keyword. The description MUST be strictly between 120 and 160 characters long.
+  3. slug: The URL slug MUST contain the exact focus_keyword (lowercase, hyphenated).
+  4. content: The very first sentence of the HTML content MUST start with the exact focus_keyword.
+- Content Expansion Blueprint (To force 1500+ words): CRITICAL SEO RULE: You MUST write a comprehensive, highly detailed article that is strictly OVER 1500 words long. Expand on sections with deep analysis, trivia, and background information to ensure the word count is met. To achieve this, you MUST structure the HTML with exactly 10 distinct <h2> headings. Under EACH <h2> heading, you MUST write at least 4 detailed paragraphs.
+- Keyword Density Enforcer: CRITICAL SEO RULE: Since you are writing a long-form article (1500+ words), you MUST use the EXACT focus_keyword string naturally between 22 and 26 times throughout the HTML content. This is mandatory to achieve a strict 1.2% keyword density. Distribute it evenly across the introduction, subheadings, body paragraphs, and conclusion. Include at least one outbound link (<a href="..." target="_blank">) to a high-authority site like Wikipedia, BBC, Reuters, or IMDB.
+- Subheading Rule: You MUST include the exact focus_keyword string in at least ONE of your <h2> subheadings.
+- Clarity & Consideration (The Hook): Write a simple, direct headline. Use a 'Power Word' or a 'Number' in the title to increase readability. Address the reader directly using 'You' more than 'I' or 'We'. Target their desires and curiosity instantly in the first two sentences.
+- Conciseness (Formatting): Ensure zero fluff. Remove filler words. Use short paragraphs of exactly 2 to 3 sentences. Keep sentences under 20 words to reduce bounce rates.
+- Transition Words: Use transition words (e.g., Furthermore, However, Consequently, Therefore) frequently to improve readability flow.
+- Concreteness & Correctness: Use specific data, clear facts, and sensory words. Ensure flawless grammar and a highly readable layout.
+- Contextual Tables: Do NOT force a table randomly. Only insert a highly professional HTML <table> when presenting structured data that logically requires it (e.g., a Net Worth breakdown, Career Statistics, Filmography, or an Event Timeline). Place it exactly where it naturally fits the narrative flow.
+- Meaningful Lists: Use bullet points (<ul>) or numbered lists (<ol>) ONLY when breaking down complex ideas, itemizing facts, or listing achievements. Do not use them just for the sake of having a list.
+- Smart Image Placement: Do not place the [INJECT_IMAGE_2_HERE] placeholder at a hardcoded spot. Instead, analyze the article's flow and organically insert the exact placeholder string [INJECT_IMAGE_2_HERE] where a visual break makes the most editorial sense (e.g., when transitioning from 'Early Life' to a new 'Career' section, or right before a major shift in topic). Ensure it does not interrupt a continuous thought or paragraph.
+- Courtesy (Tone): Maintain a highly helpful, engaging, and welcoming tone.
+- Tags & Links: Generate a JSON array named tags containing exactly 15 to 20 highly specific, long-tail SEO tags relevant to the article. Mix entity names, trending search queries (like 'Net Worth 2026'), associated people, and specific events. Do NOT use generic one-word tags. Integrate these naturally into the body text. Add 1 Internal Link placeholder (format: [Internal Link: Relevant Keyword]) within the content.
+- Category: Analyze the article and return TWO category fields: parent_category (string, e.g., 'Sports', 'Entertainment') and sub_categories (An ARRAY of strings). You MUST dynamically decide how many sub-categories are relevant.
+- Slug: Generate a slug (URL-friendly string, lowercase, hyphen-separated) that MUST contain the exact focus_keyword.
+- Thumbnail Text: Generate a short, highly engaging text specifically for an image overlay. It MUST be extremely short: Maximum 3 to 5 words. It MUST be highly engaging, clickbaity, and use a power word (e.g., 'Shocking Truth Revealed!', 'Must See Details!', 'Hidden Secrets!'). It should summarize the core emotion or shock-value of the article.
+
+CRITICAL OUTPUT REQUIREMENT: You MUST return ONLY valid JSON formatted strictly as follows, without any markdown backticks, explanations, or extra text:
+{
+  "title": "Simple direct headline",
+  "content": "Full HTML article body text following the formatting rules...",
+  "parent_category": "Broad Category (e.g., Sports, Entertainment)",
+  "sub_categories": ["Sub-category 1", "Sub-category 2"],
+  "focus_keyword": "single-strong-keyword",
+  "slug": "url-friendly-slug-with-keyword",
+  "tags": ["Highly Specific Tag 1", "Person Net Worth 2026", "Associated Event 2026", "Trending Search Query 4"],
+  "seo_description": "A compelling meta description",
+  "thumbnail_text": "Shocking Truth Revealed!"
+}`;
+
+  try {
+    const result = await geminiModel.generateContent(prompt);
+    return result.response.text();
+  } catch (error) {
+    console.error(`[Gemini Error] Primary model failed for "${topicTitle}": ${error.message || error}`);
+    
+    // Autonomous problem solving: retry across active fallback models with backoff
+    const fallbackModels = ['gemini-3.5-flash', 'gemini-flash-latest', 'gemini-2.0-flash-lite', 'gemini-3.1-flash-lite', 'gemini-2.5-pro'];
+    
+    for (const modelName of fallbackModels) {
+      console.log(`[Gemini Fallback] Retrying generation with model '${modelName}'...`);
+      const maxRetries = 3;
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          const fallbackModel = genAI.getGenerativeModel({ model: modelName });
+          const fallbackResult = await fallbackModel.generateContent(prompt);
+          return fallbackResult.response.text();
+        } catch (err) {
+          if (err.message && (err.message.includes('503') || err.message.includes('429') || err.message.includes('high demand'))) {
+            if (attempt < maxRetries) {
+              const waitTime = 2000 * Math.pow(2, attempt - 1);
+              await delay(waitTime);
+              continue;
+            }
+          } else if (err.message && (err.message.includes('404') || err.message.includes('not found') || err.message.includes('not supported'))) {
+            break;
+          }
+          if (attempt === maxRetries) {
+            break;
+          }
+        }
+      }
+    }
+    throw new Error(`Failed to generate articles after retrying all fallback models: ${error.message || error}`);
+  }
+}
+
+/**
+ * Fetches top trending US Sports and Entertainment news from NewsData.io API using axios.
+ * Filters to keep only articles where image_url is NOT null, extracting top 3 Sports and top 2 Entertainment.
+ * @returns {Promise<Array<{title: string, link: string, snippet: string, image_url: string, category: string}>>}
+ */
+async function getCombinedEntertainmentAndSportsTrends() {
+  console.log(`[Info] Fetching US Sports and Entertainment news from NewsData.io API...`);
+  
+  try {
+    const apiKey = process.env.NEWSDATA_API_KEY;
+    if (!apiKey) {
+      throw new Error("NEWSDATA_API_KEY is not defined in process.env");
+    }
+
+    const sportsUrl = `https://newsdata.io/api/1/news?apikey=${apiKey}&country=us&category=sports`;
+    const entUrl = `https://newsdata.io/api/1/news?apikey=${apiKey}&country=us&category=entertainment`;
+
+    const [sportsResp, entResp] = await Promise.all([
+      axios.get(sportsUrl, { timeout: 15000 }),
+      axios.get(entUrl, { timeout: 15000 })
+    ]);
+
+    const sportsResults = sportsResp.data?.results || [];
+    const entResults = entResp.data?.results || [];
+
+    // Filter the results array to keep only articles where image_url is NOT null
+    const sportsFiltered = sportsResults.filter(item => item && item.image_url !== null && item.image_url !== undefined && item.image_url !== '');
+    const entFiltered = entResults.filter(item => item && item.image_url !== null && item.image_url !== undefined && item.image_url !== '');
+
+    // Extract top 5 articles for Sports and top 5 for Entertainment
+    const sportsTopics = sportsFiltered.slice(0, 5).map(item => ({
+      title: item.title || 'Unknown Sports Topic',
+      link: item.link || '',
+      snippet: item.description || item.content || item.title,
+      image_url: item.image_url,
+      category: 'sports'
+    }));
+
+    const entTopics = entFiltered.slice(0, 5).map(item => ({
+      title: item.title || 'Unknown Entertainment Topic',
+      link: item.link || '',
+      snippet: item.description || item.content || item.title,
+      image_url: item.image_url,
+      category: 'entertainment'
+    }));
+
+    const combined = [...sportsTopics, ...entTopics];
+    console.log(`[Info] Successfully retrieved ${combined.length} valid topics (${sportsTopics.length} Sports, ${entTopics.length} Entertainment).`);
+    return combined;
+  } catch (error) {
+    const errMsg = error.response?.data?.results?.message || error.response?.data?.message || error.message;
+    console.error(`[Error] Failed to fetch NewsData.io API: ${errMsg}`);
+    return [];
+  }
+}
+
+/**
+ * Helper function to get an existing WordPress category ID by name, or create it if not found.
+ * Uses global wpCategoriesMap for in-memory caching to optimize performance.
+ * @param {string} categoryName - The name of the category (e.g., 'Football', 'Hollywood')
+ * @param {number} parentId - The parent category ID (0 for no parent)
+ * @returns {Promise<number|null>} The WordPress category ID
+ */
+async function getOrCreateCategory(categoryName, parentId = 0) {
+  try {
+    if (!categoryName) return null;
+    const cleanName = categoryName.trim();
+    if (!cleanName) return null;
+
+    const lowerName = cleanName.toLowerCase();
+    
+    // Check in-memory cache first
+    if (wpCategoriesMap.has(lowerName)) {
+      return wpCategoriesMap.get(lowerName);
+    }
+
+    if (!process.env.WP_USERNAME || !process.env.WP_APP_PASSWORD || !process.env.WP_URL) {
+      throw new Error("Missing required WordPress environment variables (WP_USERNAME, WP_APP_PASSWORD, or WP_URL)");
+    }
+
+    const credentials = `${process.env.WP_USERNAME}:${process.env.WP_APP_PASSWORD}`;
+    const token = Buffer.from(credentials).toString('base64');
+    const headers = {
+      'Authorization': `Basic ${token}`,
+      'Content-Type': 'application/json'
+    };
+
+    const wpBaseUrl = process.env.WP_URL.replace(/\/$/, '');
+
+    // If no match found, make POST request to create it
+    console.log(`  ↳ Category "${cleanName}" not found on WordPress. Creating new category...`);
+    const createUrl = `${wpBaseUrl}/wp-json/wp/v2/categories`;
+    const postResp = await axios.post(createUrl, { name: cleanName, parent: parentId }, { headers });
+    
+    if (postResp.data && postResp.data.id) {
+      console.log(`  ↳ ✅ Created new category "${cleanName}" (ID: ${postResp.data.id})`);
+      // Immediately update local memory
+      wpCategoriesMap.set(lowerName, postResp.data.id);
+      return postResp.data.id;
+    }
+
+    return null;
+  } catch (error) {
+    const errDetail = error.response
+      ? `HTTP ${error.response.status} - ${JSON.stringify(error.response.data)}`
+      : error.message;
+    console.error(`  ↳ [WordPress Category Error] Failed getOrCreateCategory for "${categoryName}": ${errDetail}`);
+    return null;
+  }
+}
+
+/**
+ * Processes a single topic: scrapes, generates article, and publishes to WordPress.
+ * Designed to be run in parallel.
+ * @param {Object} item - The topic object from NewsData
+ * @param {number} index - Index for logging
+ * @returns {Promise<Object|null>} The structured result or null on failure
+ */
+async function processAndPublishArticle(item, index) {
+  console.log(`[Topic Process ${index}] Processing: "${item.title}"`);
+  
+  try {
+    if (!item.link) {
+      console.log(`  ↳ [Topic ${index}] Skipped: No valid source URL.`);
+      return null;
+    }
+
+    console.log(`  ↳ [Topic ${index}] Scraping source URL via Cheerio...`);
+    const scraped = await scrapeArticleText(item.link);
+    console.log(`  ↳ [Topic ${index}] Scraped ${scraped.wordCount} words (${scraped.status}).`);
+
+    const rawText = (scraped.wordCount > 0 && scraped.text) ? scraped.text : (item.snippet || item.title);
+    const combinedText = `--- ARTICLE: ${item.title} (${item.link}) ---\n${rawText}`;
+    
+    console.log(`  ↳ [Topic ${index}] Generating SEO article via Gemini AI...`);
+    const generatedOutput = await generateArticles(item.title, combinedText);
+
+    // Parse Gemini JSON output
+    let parsedGemini = {};
+    try {
+      const cleanedJsonStr = generatedOutput.replace(/```json/gi, '').replace(/```/gi, '').trim();
+      const firstBrace = cleanedJsonStr.indexOf('{');
+      const lastBrace = cleanedJsonStr.lastIndexOf('}');
+      const jsonSubstring = (firstBrace !== -1 && lastBrace !== -1) 
+        ? cleanedJsonStr.slice(firstBrace, lastBrace + 1) 
+        : cleanedJsonStr;
+      parsedGemini = JSON.parse(jsonSubstring);
+    } catch (err) {
+      console.warn(`  ↳ [Topic ${index}] [Warning] Could not parse Gemini output as JSON directly. Attempting fallback text parsing...`);
+      parsedGemini = { 
+        title: `${item.title}`, 
+        content: generatedOutput, 
+        parent_category: item.category || 'General', 
+        sub_categories: ['News'], 
+        focus_keyword: item.title, 
+        tags: [item.title],
+        thumbnail_text: 'Must See Details!' 
+      };
+    }
+
+    const parentCategory = parsedGemini?.parent_category || item.category || 'General';
+    const subCategories = Array.isArray(parsedGemini?.sub_categories) ? parsedGemini.sub_categories : ['News'];
+
+    // Structure into the final result object using NewsData.io original image_url
+    const topicResult = {
+      topic: item.title,
+      title: parsedGemini?.title || `${item.title}`,
+      content: parsedGemini?.content || '',
+      image1: item.image_url || '',
+      image2: item.image_url || '',
+      parent_category: parentCategory,
+      sub_categories: subCategories,
+      topicType: item.category || 'sports',
+      focus_keyword: parsedGemini?.focus_keyword || item.title,
+      slug: parsedGemini?.slug || '',
+      tags: Array.isArray(parsedGemini?.tags) ? parsedGemini.tags : [item.title],
+      seo_description: parsedGemini?.seo_description || '',
+      thumbnail_text: parsedGemini?.thumbnail_text || ''
+    };
+
+    console.log(`  ↳ [Topic ${index}] ✅ Successfully structured Article ("${topicResult.title}" | Category: ${topicResult.parent_category} > [${topicResult.sub_categories.join(', ')}])`);
+
+    // Publish Article directly to WordPress as draft
+    console.log(`  ↳ [Topic ${index}] Pushing Article to WordPress as draft...`);
+    try {
+      await publishToWordPress(topicResult);
+    } catch (wpErr) {
+      console.error(`  ↳ [Topic ${index}] [WordPress Error] Article publishing threw exception: ${wpErr.message}`);
+    }
+
+    return topicResult;
+  } catch (topicError) {
+    // Robust error handling: log and return null without crashing the batch
+    console.error(`  ↳ [Topic ${index}] [Error] Failed processing topic "${item.title}": ${topicError.message}`);
+    return null;
+  }
+}
+
+/**
+ * Fetches combined Sports and Entertainment trends, selects top 10 topics,
+ * and processes them in parallel batches for extreme speed.
+ */
+async function fetchAndScrapeTrends() {
+  try {
+    // 1. Preload global state to avoid redundant API hits for categories/tags
+    await preloadWordPressTaxonomies();
+
+    const combinedTopics = await getCombinedEntertainmentAndSportsTrends();
+    const topTopics = combinedTopics.slice(0, 10);
+
+    if (topTopics.length === 0) {
+      console.log('[Info] No trending topics found. Exiting.');
+      return;
+    }
+
+    console.log(`\n[Info] Starting ultra-fast parallel generation pipeline for ${topTopics.length} topics...\n`);
+    const allResults = [];
+    const BATCH_SIZE = 3;
+
+    for (let i = 0; i < topTopics.length; i += BATCH_SIZE) {
+      const batch = topTopics.slice(i, i + BATCH_SIZE);
+      console.log(`\n[Batch] Processing topics ${i + 1} to ${Math.min(i + BATCH_SIZE, topTopics.length)} in parallel...`);
+      
+      const batchPromises = batch.map((item, localIndex) => 
+        processAndPublishArticle(item, i + localIndex + 1)
+      );
+      
+      const batchResults = await Promise.all(batchPromises);
+      const successfulResults = batchResults.filter(Boolean);
+      allResults.push(...successfulResults);
+
+      if (i + BATCH_SIZE < topTopics.length) {
+        console.log(`[Batch] Waiting 3 seconds before next batch to respect API limits...`);
+        await delay(3000);
+      }
+    }
+
+    // Write final audit files to disk
+    fs.writeFileSync('final_audit.json', JSON.stringify(allResults, null, 2), 'utf8');
+    fs.writeFileSync('audit_data.json', JSON.stringify(allResults, null, 2), 'utf8');
+    console.log(`\n[Success] Pipeline complete. Generated ${allResults.length} articles across ${topTopics.length} topics.`);
+    console.log(`[Success] Audit files saved: final_audit.json and audit_data.json.`);
+
+  } catch (error) {
+    console.error('[Fatal Error] Unhandled exception in pipeline execution:');
+    if (error.response) {
+      console.error(`HTTP Status ${error.response.status}: ${JSON.stringify(error.response.data)}`);
+    } else {
+      console.error(error.message || error);
+    }
+  }
+}
+
+/**
+ * Helper function to loop through string tags, get existing WP tag ID or create if not found.
+ * Uses global wpTagsMap for in-memory caching and WP REST API GET search to optimize performance.
+ * @param {string[]} tagArray - Array of tag strings generated by Gemini
+ * @returns {Promise<number[]>} Array of integer Tag IDs
+ */
+async function resolveTags(tagArray) {
+  if (!Array.isArray(tagArray) || tagArray.length === 0) {
+    return [];
+  }
+
+  const tagIds = [];
+  try {
+    if (!process.env.WP_USERNAME || !process.env.WP_APP_PASSWORD || !process.env.WP_URL) {
+      throw new Error("Missing required WordPress environment variables (WP_USERNAME, WP_APP_PASSWORD, or WP_URL)");
+    }
+
+    const credentials = `${process.env.WP_USERNAME}:${process.env.WP_APP_PASSWORD}`;
+    const token = Buffer.from(credentials).toString('base64');
+    const headers = {
+      'Authorization': `Basic ${token}`,
+      'Content-Type': 'application/json'
+    };
+
+    const wpBaseUrl = process.env.WP_URL.replace(/\/$/, '');
+
+    for (const rawTag of tagArray) {
+      if (!rawTag || typeof rawTag !== 'string') continue;
+      const tagName = rawTag.trim();
+      if (!tagName) continue;
+
+      const lowerName = tagName.toLowerCase();
+
+      try {
+        if (wpTagsMap.has(lowerName)) {
+          tagIds.push(wpTagsMap.get(lowerName));
+        } else {
+          // Check WordPress via GET request if it exists
+          const searchUrl = `${wpBaseUrl}/wp-json/wp/v2/tags?search=${encodeURIComponent(tagName)}`;
+          const searchResp = await axios.get(searchUrl, { headers });
+          
+          if (searchResp.data && searchResp.data.length > 0) {
+            // Grab the ID if it exists
+            const existingTagId = searchResp.data[0].id;
+            console.log(`  ↳ Found existing tag "${tagName}" via search (ID: ${existingTagId})`);
+            wpTagsMap.set(lowerName, existingTagId);
+            tagIds.push(existingTagId);
+          } else {
+            // Create the tag if not found
+            console.log(`  ↳ Tag "${tagName}" not found. Creating new WordPress tag...`);
+            const createUrl = `${wpBaseUrl}/wp-json/wp/v2/tags`;
+            const postResp = await axios.post(createUrl, { name: tagName }, { headers });
+            if (postResp.data && postResp.data.id) {
+              console.log(`  ↳ ✅ Created tag "${tagName}" (ID: ${postResp.data.id})`);
+              wpTagsMap.set(lowerName, postResp.data.id);
+              tagIds.push(postResp.data.id);
+            }
+          }
+        }
+      } catch (tagErr) {
+        const errDetail = tagErr.response
+          ? `HTTP ${tagErr.response.status} - ${JSON.stringify(tagErr.response.data)}`
+          : tagErr.message;
+        console.warn(`  ↳ [Tag Error] Could not get or create tag "${tagName}": ${errDetail}`);
+      }
+    }
+  } catch (error) {
+    console.error(`  ↳ [WordPress Tag Helper Error] ${error.message}`);
+  }
+
+  return tagIds;
+}
+
+/**
+ * Generates a dynamic thumbnail using Canvas by overlaying text and a gradient.
+ * @param {string} imageUrl - Source image URL
+ * @param {string} thumbnailText - Text to overlay
+ * @returns {Promise<Buffer>} - Image buffer ready for upload
+ */
+async function generateThumbnail(imageUrl, thumbnailText) {
+  try {
+    const imgResponse = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 15000 });
+    const imgBuffer = Buffer.from(imgResponse.data, 'binary');
+    
+    const canvas = createCanvas(1280, 720);
+    const ctx = canvas.getContext('2d');
+    
+    // 1. Full Image Background
+    const image = await loadImage(imgBuffer);
+    
+    // Object-fit cover logic for full canvas (1280x720)
+    const targetWidth = 1280;
+    const targetHeight = 720;
+    const scale = Math.max(targetWidth / image.width, targetHeight / image.height);
+    const x = (targetWidth / 2) - (image.width / 2) * scale;
+    const y = (targetHeight / 2) - (image.height / 2) * scale;
+    
+    ctx.drawImage(image, x, y, image.width * scale, image.height * scale);
+    
+    // 2. Cinematic Gradient Overlay
+    const gradient = ctx.createLinearGradient(0, 0, 800, 0);
+    gradient.addColorStop(0.0, 'rgba(0, 0, 0, 0.9)');
+    gradient.addColorStop(1.0, 'rgba(0, 0, 0, 0)');
+    
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 1280, 720);
+    
+    // 3. Typography (Left-Aligned & Premium)
+    if (thumbnailText) {
+      ctx.font = 'bold 75px sans-serif';
+      
+      // Basic word wrapping for max width 540
+      const words = thumbnailText.trim().split(/\s+/);
+      let line = '';
+      const lines = [];
+      const maxWidth = 540;
+      
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && n > 0) {
+          lines.push(line.trim());
+          line = words[n] + ' ';
+        } else {
+          line = testLine;
+        }
+      }
+      lines.push(line.trim());
+      
+      const lineHeight = 85;
+      let startY = (canvas.height - (lines.length * lineHeight)) / 2 + (lineHeight / 1.5); // Vertically centered
+      
+      ctx.shadowColor = 'black';
+      ctx.shadowBlur = 15;
+      ctx.shadowOffsetX = 4;
+      ctx.shadowOffsetY = 4;
+      
+      for (let i = 0; i < lines.length; i++) {
+        const currentLine = lines[i];
+        
+        // Check if it's the very last line
+        if (i === lines.length - 1) {
+          const lineWords = currentLine.split(' ');
+          const lastWord = lineWords.pop();
+          const restOfLine = lineWords.join(' ') + (lineWords.length > 0 ? ' ' : '');
+          
+          // Draw rest of the line in white
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillText(restOfLine, 50, startY);
+          
+          // Draw the last word in yellow
+          const restMetrics = ctx.measureText(restOfLine);
+          ctx.fillStyle = '#FFD700';
+          ctx.fillText(lastWord, 50 + restMetrics.width, startY);
+        } else {
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillText(currentLine, 50, startY);
+        }
+        
+        startY += lineHeight;
+      }
+      
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+    }
+    
+    return canvas.toBuffer('image/jpeg', { quality: 0.95 });
+  } catch (error) {
+    console.error(`  ↳ [Thumbnail Gen Error] Failed to generate thumbnail: ${error.message}`);
+    throw error;
+  }
+}
+
+/**
+ * Downloads an image, generates a thumbnail overlay, and uploads it to the WordPress Media Library.
+ * @param {string} imageUrl - The URL of the image to download
+ * @param {string} title - The title for the filename
+ * @param {string} [altText] - Optional alt text to set on the media
+ * @param {string} [thumbnailText] - Text to overlay on the image
+ * @returns {Promise<number|null>} The WordPress Media ID, or null if it fails
+ */
+async function uploadImageToWordPress(imageUrl, title, altText, thumbnailText) {
+  if (!imageUrl) return null;
+  try {
+    if (!process.env.WP_USERNAME || !process.env.WP_APP_PASSWORD || !process.env.WP_URL) {
+      throw new Error("Missing required WordPress environment variables (WP_USERNAME, WP_APP_PASSWORD, or WP_URL)");
+    }
+
+    // 1. Generate Thumbnail or Fallback
+    let buffer;
+    try {
+      buffer = await generateThumbnail(imageUrl, thumbnailText || title);
+    } catch (thumbError) {
+      console.warn(`  ↳ [Warning] Thumbnail generation failed, falling back to raw image. Reason: ${thumbError.message}`);
+      const fallbackResp = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 15000 });
+      buffer = Buffer.from(fallbackResp.data, 'binary');
+    }
+
+    // 2. Upload to WP using FormData
+    const credentials = `${process.env.WP_USERNAME}:${process.env.WP_APP_PASSWORD}`;
+    const token = Buffer.from(credentials).toString('base64');
+    const safeTitle = (title || 'image').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const wpEndpoint = `${process.env.WP_URL.replace(/\/$/, '')}/wp-json/wp/v2/media`;
+
+    const form = new FormData();
+    const keywordSlug = (altText || title || 'image').replace(/[^a-z0-9]/gi, '-').replace(/(^-|-$)+/g, '').toLowerCase();
+    const filename = `${keywordSlug}-${Date.now()}.jpg`;
+    form.append('file', buffer, { filename: filename, contentType: 'image/jpeg' });
+    
+    const uploadResponse = await axios.post(wpEndpoint, form, {
+      headers: {
+        'Authorization': `Basic ${token}`,
+        ...form.getHeaders()
+      }
+    });
+
+    console.log(`  ↳ ✅ Uploaded generated thumbnail to WP Media Library (Media ID: ${uploadResponse.data.id})`);
+    
+    // 3. Update the media item with alt_text if provided
+    if (altText) {
+      try {
+        await axios.post(`${wpEndpoint}/${uploadResponse.data.id}`, { alt_text: altText }, {
+          headers: {
+            'Authorization': `Basic ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        console.log(`  ↳ ✅ Set alt_text on WP Media Library (Media ID: ${uploadResponse.data.id})`);
+      } catch (altError) {
+        console.warn(`  ↳ [Warning] Failed to set alt_text on media ID ${uploadResponse.data.id}: ${altError.message}`);
+      }
+    }
+    
+    return uploadResponse.data.id;
+  } catch (error) {
+    const errDetail = error.response
+      ? `HTTP ${error.response.status} - ${JSON.stringify(error.response.data)}`
+      : error.message;
+    console.error(`  ↳ [WordPress Media Error] Failed to upload image: ${errDetail}`);
+    return null;
+  }
+}
+
+/**
+ * Publishes a single article object to WordPress via REST API as a draft.
+ * Uses HTTP Basic Auth with WP Application Password.
+ * Embeds image1 cleanly at the very top of the content HTML string.
+ * Maps category and tag IDs as integers and passes RankMath focus keyword in meta.
+ * @param {{ title: string, content: string, image1: string, image2?: string, topicType?: string, focus_keyword?: string, seo_tags?: string[], parent_category?: string, sub_categories?: string[] }} article - Article data object
+ */
+async function publishToWordPress(article) {
+  try {
+    if (!process.env.WP_USERNAME || !process.env.WP_APP_PASSWORD || !process.env.WP_URL) {
+      throw new Error("Missing required WordPress environment variables (WP_USERNAME, WP_APP_PASSWORD, or WP_URL)");
+    }
+
+    const credentials = `${process.env.WP_USERNAME}:${process.env.WP_APP_PASSWORD}`;
+    const token = Buffer.from(credentials).toString('base64');
+
+    // Get or create parent and sub category IDs
+    const parentId = await getOrCreateCategory(article.parent_category);
+    let finalCategoryIds = [parentId];
+
+    if (Array.isArray(article.sub_categories)) {
+      for (const subCatName of article.sub_categories) {
+        if (!subCatName) continue;
+        const subCategoryId = await getOrCreateCategory(subCatName, parentId);
+        if (subCategoryId) {
+          finalCategoryIds.push(subCategoryId);
+        }
+      }
+    }
+
+    // Filter out null IDs if category creation failed
+    const categoryIds = finalCategoryIds.filter(id => id !== null);
+
+    // Get or create tag integer IDs
+    const tagIds = await resolveTags(article.tags);
+
+    // Upload image to WordPress Media Library
+    let mediaId = null;
+    if (article.image1) {
+      mediaId = await uploadImageToWordPress(article.image1, article.title, article.focus_keyword, article.thumbnail_text);
+    }
+
+    // Convert plain text newlines to HTML paragraphs for clean WordPress rendering
+    let formattedBody = article.content
+      .split('\n\n')
+      .map(para => para.trim().startsWith('<') ? para.trim() : `<p>${para.trim()}</p>`)
+      .join('\n');
+
+    // Auto-inject internal link
+    formattedBody += '\n\n<h3>More Like This</h3>\n<p>For more updates, check out our <a href="https://brightcelebrity.com/">latest entertainment and sports news</a>.</p>';
+
+    // Inject in-content image 2 if placeholder exists and image2 is available
+    if (article.image2 && formattedBody.includes('[INJECT_IMAGE_2_HERE]')) {
+      formattedBody = formattedBody.replace(
+        '[INJECT_IMAGE_2_HERE]', 
+        `<img src="${article.image2}" alt="${article.focus_keyword} details" style="width:100%; height:auto; margin: 20px 0; border-radius: 8px;" />`
+      );
+    } else {
+      // Clean up placeholder if image2 is not available
+      formattedBody = formattedBody.replace('[INJECT_IMAGE_2_HERE]', '');
+    }
+
+    const postContent = formattedBody;
+    const wpEndpoint = `${process.env.WP_URL.replace(/\/$/, '')}/wp-json/wp/v2/posts`;
+
+    // Create a clean, short slug from the focus keyword (e.g., 'Michelle Pfeiffer' -> 'michelle-pfeiffer')
+    let seoSlug = article.focus_keyword.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+    if (seoSlug.length > 74) {
+      seoSlug = seoSlug.substring(0, 74).replace(/-+$/, '');
+    }
+
+    const payload = {
+      title: article.title || 'Untitled Article',
+      content: postContent,
+      status: 'publish',
+      categories: categoryIds,
+      tags: tagIds,
+      slug: seoSlug,
+      meta: {
+        rank_math_focus_keyword: article.focus_keyword || '',
+        rank_math_description: article.seo_description || '',
+        rank_math_title: article.title || '',
+        rank_math_content_ai_score: '100'
+      }
+    };
+
+    if (mediaId) {
+      payload.featured_media = mediaId;
+    }
+
+    console.log('IMPORTANT: Ensure rank_math_title is registered in your WP functions.php snippet to allow REST API updates.');
+
+    console.log('🚀 DEBUG PAYLOAD:', JSON.stringify({ title: payload.title, meta: payload.meta, focus_keyword_from_ai: article.focus_keyword }, null, 2));
+
+    const response = await axios.post(wpEndpoint, payload, {
+      headers: {
+        'Authorization': `Basic ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    console.log(`  ↳ ✅ Published on WP | Post ID: ${response.data.id} | Title: ${article.title}`);
+    return response.data;
+  } catch (error) {
+    const errDetail = error.response
+      ? `HTTP ${error.response.status} - ${JSON.stringify(error.response.data)}`
+      : error.message;
+    console.error(`  ↳ [WordPress Error] Failed publishing for "${article?.title}": ${errDetail}`);
+    // Continue without crashing the script
+  }
+}
+
+// Execute the script
+fetchAndScrapeTrends();

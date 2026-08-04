@@ -1,0 +1,29 @@
+name: CraftZone 1-Hour Auto Publisher
+
+on:
+  schedule:
+    - cron: '0 * * * *' # Runs every hour at minute 0
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  publish-article:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Run CraftZone Automation Script
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        WP_USERNAME: ${{ secrets.WP_USERNAME }}
+        WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
+        WP_URL: ${{ secrets.WP_URL }}
+      run: node index.js

@@ -78,13 +78,20 @@ async function scrapeArticleText(url) {
 
     const $ = cheerio.load(response.data);
 
-    // Extract main Open Graph image and article body image BEFORE removing DOM elements
+    // Extract main Open Graph image BEFORE removing DOM elements
     const image1 = $('meta[property="og:image"]').attr('content') || '';
-    let image2 = $('article img').first().attr('src') || $('img').eq(1).attr('src') || '';
-
-    if (!image2) {
-      image2 = image1;
-    }
+    
+    // Extract body images (up to 4 valid distinct images)
+    const bodyImages = [];
+    $('img').each((_, element) => {
+      let src = $(element).attr('src');
+      if (src && !src.startsWith('data:image') && !src.includes('pixel') && !src.includes('icon') && !bodyImages.includes(src)) {
+        bodyImages.push(src);
+      }
+    });
+    
+    // Keep at most 4 body images
+    const finalBodyImages = bodyImages.slice(0, 4);
 
     // Remove irrelevant elements before extracting paragraph text
     $('script, style, nav, footer, header, aside, iframe, noscript').remove();
@@ -105,7 +112,7 @@ async function scrapeArticleText(url) {
       ? `Meets requirement (${wordCount} words >= 500)` 
       : `Under 500 words (${wordCount} words)`;
 
-    return { text: fullText, wordCount, status, image1, image2 };
+    return { text: fullText, wordCount, status, image1, bodyImages: finalBodyImages };
   } catch (error) {
     const errMsg = error.response 
       ? `HTTP Status ${error.response.status} (${error.response.statusText})` 
@@ -115,7 +122,7 @@ async function scrapeArticleText(url) {
       wordCount: 0, 
       status: `Error: ${errMsg}`,
       image1: '',
-      image2: ''
+      bodyImages: []
     };
   }
 }
@@ -136,13 +143,13 @@ Write a high-quality news article based on the provided text.
 STRICT INSTRUCTIONS:
 - Keyword Generation First: Generate a strict 1-2 word focus_keyword.
 - Forced Exact String Match (Zero Tolerance): You MUST use this EXACT 1-2 word string, character-for-character, in:
-  1. title: The title MUST strictly start with the exact focus_keyword, followed by a colon (:), and it MUST contain a number. Inject Power & Sentiment Words (NEW): The title MUST organically include at least ONE recognized 'Power Word' (e.g., Secret, Shocking, Ultimate, Proven, Massive, Unbelievable) AND at least ONE 'Sentiment Word' (e.g., Best, Worst, Heartbreaking, Inspiring, Tragic, Beautiful, Triumphant). Example Format: '[Focus Keyword]: 7 [Power Word] Secrets Behind This [Sentiment Word] Event'. Example Output: 'Lewis Hamilton: 5 Shocking Details About His Heartbreaking Defeat'. Do not place the focus keyword in the middle or end of the title.
+  1. title: MUST contain a Number (e.g., 5, 7) and a Power Word (e.g., Shocking, Massive, Ultimate). The title MUST strictly start with the exact focus_keyword, followed by a colon (:). Example Format: '[Focus Keyword]: 7 [Power Word] Secrets Behind This [Sentiment Word] Event'.
   2. seo_description: The very first words of this description MUST be the exact focus_keyword. The description MUST be strictly between 120 and 160 characters long.
   3. slug: The URL slug MUST contain the exact focus_keyword (lowercase, hyphenated).
-  4. content: Ensure the exact focus_keyword appears naturally in the very first sentence of the HTML content.
+  4. content: Ensure the exact focus_keyword appears naturally in the very first sentence of the HTML content (First 10% rule).
 - Content Expansion Blueprint (To force 1500+ words): CRITICAL SEO RULE: You MUST write a comprehensive, highly detailed article that is strictly OVER 1500 words long. Expand on sections with deep analysis, trivia, and background information to ensure the word count is met. To achieve this, you MUST structure the HTML with exactly 10 distinct <h2> headings. Under EACH <h2> heading, you MUST write at least 4 detailed paragraphs.
 - Keyword Density Enforcer: Maintain a natural keyword density of strictly 1% to 1.5%. Do not repeat the focus keyword more than 15 times in the entire article. Overusing the keyword will result in a penalty.
-- SEO Linking & Formatting Rules: Embed exactly one EXTERNAL link to a high-authority site (like Wikipedia, Reuters, or a major news outlet) in the content using proper <a> tags. Embed exactly one INTERNAL link. Create an <a> tag pointing to https://brightcelebrity.com/ with a generic anchor text like 'Read more entertainment news here' within the body paragraphs. Ensure the focus keyword is bolded <strong> at least twice in the article.
+- SEO Linking & Formatting Rules: Embed exactly one EXTERNAL link to a high-authority site (like Wikipedia, Reuters, or a major news outlet) in the content using proper <a> tags. The generated HTML must contain exactly one internal link to https://brightcelebrity.com/ using descriptive anchor text (not 'click here') embedded within the body paragraphs. Ensure the focus keyword is bolded <strong> at least twice in the article.
 - HEADING STRUCTURE (CRITICAL): NEVER use an <h1> tag in your generated content. The WordPress theme already wraps the title in an <h1>. Your main section headings MUST be <h2>, and sub-sections MUST be <h3>. Ensure headings naturally include the focus keyword, but do not overuse <h2> everywhere.
 - THE ENGAGEMENT HOOK: Start the very first paragraph with a strong 'hook'—a shocking fact, a provocative question, or a bold statement to immediately grab the reader's attention. Address the reader directly using 'You' more than 'I' or 'We'.
 - RICH MICRO-FORMATTING: Break up the text to make it highly scannable. Use the <strong> tag generously to bold celebrity names, important dates, financial figures, and key locations within the paragraphs. Keep paragraphs strictly to 2-3 sentences max. Ensure zero fluff and remove filler words.
@@ -156,7 +163,8 @@ STRICT INSTRUCTIONS:
   H2: [Data/Stats Section Title] -> Followed by the newly styled premium HTML table.
   H2: [Final Thoughts / Conclusion] -> Summarize and naturally include the focus keyword one last time.
 - Meaningful Lists: Use bullet points (<ul>) or numbered lists (<ol>) ONLY when breaking down complex ideas, itemizing facts, or listing achievements. Do not use them just for the sake of having a list.
-- Smart Image Placement & IMAGE ALT ATTRIBUTE ENFORCEMENT: Do not place the [INJECT_IMAGE_2_HERE] placeholder at a hardcoded spot. Instead, analyze the article's flow and organically insert the exact placeholder string [INJECT_IMAGE_2_HERE] where a visual break makes the most editorial sense (e.g., when transitioning from 'Early Life' to a new 'Career' section, or right before a major shift in topic). Ensure it does not interrupt a continuous thought or paragraph. If you suggest or generate placeholders for images, ensure the <img> tag includes an alt attribute that naturally incorporates the focus keyword (e.g., alt="[Focus Keyword] - exclusive details").
+- Smart Image Placement & MULTI-IMAGE ALT TAGS: You must dynamically and organically insert multiple image placeholders: [INJECT_IMAGE_2_HERE], [INJECT_IMAGE_3_HERE], [INJECT_IMAGE_4_HERE], and [INJECT_IMAGE_5_HERE] throughout the HTML content. Place them where visual breaks make editorial sense (e.g. after a major H2 tag). Do NOT use generic <img> tags, ONLY use the exact string placeholders.
+- Alt Tags generation: You must generate a JSON array named body_image_alt_tags containing 4 strings. These strings must be highly descriptive, long-tail variations of the focus keyword to be used as alt text for the images.
 - Courtesy (Tone): Maintain a highly helpful, engaging, and welcoming tone.
 - Tags: Generate a JSON array named tags containing exactly 15 to 20 highly specific, long-tail SEO tags relevant to the article. Mix entity names, trending search queries (like 'Net Worth 2026'), associated people, and specific events. Do NOT use generic one-word tags. Integrate these naturally into the body text.
 - Category: Analyze the article and return TWO category fields: parent_category (string, e.g., 'Sports', 'Entertainment') and sub_categories (An ARRAY of strings). You MUST dynamically decide how many sub-categories are relevant.
@@ -173,7 +181,8 @@ CRITICAL OUTPUT REQUIREMENT: You MUST return ONLY valid JSON formatted strictly 
   "slug": "url-friendly-slug-with-keyword",
   "tags": ["Highly Specific Tag 1", "Person Net Worth 2026", "Associated Event 2026", "Trending Search Query 4"],
   "seo_description": "A compelling meta description",
-  "thumbnail_text": "Shocking Truth Revealed!"
+  "thumbnail_text": "Shocking Truth Revealed!",
+  "body_image_alt_tags": ["long-tail-alt-1", "long-tail-alt-2", "long-tail-alt-3", "long-tail-alt-4"]
 }`;
 
   try {
@@ -386,7 +395,8 @@ async function processAndPublishArticle(item, index) {
       title: parsedGemini?.title || `${item.title}`,
       content: parsedGemini?.content || '',
       image1: item.image_url || '',
-      image2: item.image_url || '',
+      bodyImages: (scraped.wordCount > 0 && Array.isArray(scraped.bodyImages) && scraped.bodyImages.length > 0) ? scraped.bodyImages : [item.image_url],
+      bodyImageAltTags: Array.isArray(parsedGemini?.body_image_alt_tags) ? parsedGemini.body_image_alt_tags : [],
       parent_category: parentCategory,
       sub_categories: subCategories,
       topicType: item.category || 'sports',
@@ -729,7 +739,7 @@ async function uploadImageToWordPress(imageUrl, title, altText, thumbnailText) {
  * Uses HTTP Basic Auth with WP Application Password.
  * Embeds image1 cleanly at the very top of the content HTML string.
  * Maps category and tag IDs as integers and passes RankMath focus keyword in meta.
- * @param {{ title: string, content: string, image1: string, image2?: string, topicType?: string, focus_keyword?: string, seo_tags?: string[], parent_category?: string, sub_categories?: string[] }} article - Article data object
+ * @param {{ title: string, content: string, image1: string, bodyImages?: string[], bodyImageAltTags?: string[], topicType?: string, focus_keyword?: string, seo_tags?: string[], parent_category?: string, sub_categories?: string[] }} article - Article data object
  */
 async function publishToWordPress(article) {
   try {
@@ -775,15 +785,24 @@ async function publishToWordPress(article) {
     // Auto-inject internal link
     formattedBody += '\n\n<h3>More Like This</h3>\n<p>For more updates, check out our <a href="https://brightcelebrity.com/">latest entertainment and sports news</a>.</p>';
 
-    // Inject in-content image 2 if placeholder exists and image2 is available
-    if (article.image2 && formattedBody.includes('[INJECT_IMAGE_2_HERE]')) {
-      formattedBody = formattedBody.replace(
-        '[INJECT_IMAGE_2_HERE]', 
-        `<img src="${article.image2}" alt="${article.focus_keyword} details" style="width:100%; height:auto; margin: 20px 0; border-radius: 8px;" />`
-      );
-    } else {
-      // Clean up placeholder if image2 is not available
-      formattedBody = formattedBody.replace('[INJECT_IMAGE_2_HERE]', '');
+    // Inject in-content images dynamically
+    const bodyImages = Array.isArray(article.bodyImages) ? article.bodyImages : [];
+    const altTags = Array.isArray(article.bodyImageAltTags) ? article.bodyImageAltTags : [];
+    
+    for (let n = 2; n <= 5; n++) {
+      const placeholder = `[INJECT_IMAGE_${n}_HERE]`;
+      if (formattedBody.includes(placeholder)) {
+        const imageUrl = bodyImages[n - 2];
+        if (imageUrl) {
+          const altTag = altTags[n - 2] || `${article.focus_keyword} details`;
+          formattedBody = formattedBody.replace(
+            placeholder,
+            `<img src="${imageUrl}" alt="${altTag}" style="width:100%; height:auto; margin: 20px 0; border-radius: 8px;" />`
+          );
+        } else {
+          formattedBody = formattedBody.replace(placeholder, '');
+        }
+      }
     }
 
     const postContent = formattedBody;

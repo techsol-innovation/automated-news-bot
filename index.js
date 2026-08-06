@@ -141,7 +141,7 @@ STRICT INSTRUCTIONS:
   3. slug: The URL slug MUST contain the exact focus_keyword (lowercase, hyphenated).
   4. content: Ensure the exact focus_keyword appears naturally in the very first sentence of the HTML content.
 - Content Expansion Blueprint (To force 1500+ words): CRITICAL SEO RULE: You MUST write a comprehensive, highly detailed article that is strictly OVER 1500 words long. Expand on sections with deep analysis, trivia, and background information to ensure the word count is met. To achieve this, you MUST structure the HTML with exactly 10 distinct <h2> headings. Under EACH <h2> heading, you MUST write at least 4 detailed paragraphs.
-- Keyword Density Enforcer: CRITICAL SEO RULE: Since you are writing a long-form article (1500+ words), you MUST use the EXACT focus_keyword string naturally between 22 and 26 times throughout the HTML content. This is mandatory to achieve a strict 1.2% keyword density. Distribute it evenly across the introduction, subheadings, body paragraphs, and conclusion.
+- Keyword Density Enforcer: Maintain a natural keyword density of strictly 1% to 1.5%. Do not repeat the focus keyword more than 15 times in the entire article. Overusing the keyword will result in a penalty.
 - SEO Linking & Formatting Rules: Embed exactly one EXTERNAL link to a high-authority site (like Wikipedia, Reuters, or a major news outlet) in the content using proper <a> tags. Embed exactly one INTERNAL link. Create an <a> tag pointing to https://brightcelebrity.com/ with a generic anchor text like 'Read more entertainment news here' within the body paragraphs. Ensure the focus keyword is bolded <strong> at least twice in the article.
 - HEADING STRUCTURE (CRITICAL): NEVER use an <h1> tag in your generated content. The WordPress theme already wraps the title in an <h1>. Your main section headings MUST be <h2>, and sub-sections MUST be <h3>. Ensure headings naturally include the focus keyword, but do not overuse <h2> everywhere.
 - THE ENGAGEMENT HOOK: Start the very first paragraph with a strong 'hook'—a shocking fact, a provocative question, or a bold statement to immediately grab the reader's attention. Address the reader directly using 'You' more than 'I' or 'We'.
@@ -163,7 +163,7 @@ STRICT INSTRUCTIONS:
 - Slug: Generate a slug (URL-friendly string, lowercase, hyphen-separated) that MUST contain the exact focus_keyword.
 - Thumbnail Text: Generate a short, highly engaging text specifically for an image overlay. It MUST be extremely short: Maximum 3 to 5 words. It MUST be highly engaging, clickbaity, and use a power word (e.g., 'Shocking Truth Revealed!', 'Must See Details!', 'Hidden Secrets!'). It should summarize the core emotion or shock-value of the article.
 
-CRITICAL OUTPUT REQUIREMENT: You MUST return ONLY valid JSON formatted strictly as follows, without any markdown backticks, explanations, or extra text:
+CRITICAL OUTPUT REQUIREMENT: You MUST return ONLY valid JSON formatted strictly as follows, without any markdown backticks, explanations, or extra text. NEVER use literal \n or \r characters in the content string. Use proper HTML tags like <p> and <br> for spacing:
 {
   "title": "Simple direct headline",
   "content": "Full HTML article body text following the formatting rules...",
@@ -355,7 +355,9 @@ async function processAndPublishArticle(item, index) {
     // Parse Gemini JSON output
     let parsedGemini = {};
     try {
-      const cleanedJsonStr = generatedOutput.replace(/```json/gi, '').replace(/```/gi, '').trim();
+      let cleanedJsonStr = generatedOutput.replace(/```json/gi, '').replace(/```/gi, '').trim();
+      // Safely replace unescaped control characters with spaces to prevent JSON.parse from failing
+      cleanedJsonStr = cleanedJsonStr.replace(/[\n\r\t]/g, ' ');
       const firstBrace = cleanedJsonStr.indexOf('{');
       const lastBrace = cleanedJsonStr.lastIndexOf('}');
       const jsonSubstring = (firstBrace !== -1 && lastBrace !== -1) 
@@ -428,7 +430,11 @@ async function fetchAndScrapeTrends() {
 
     console.log("Step 2: Fetching Trends from NewsData API...");
     const combinedTopics = await getCombinedEntertainmentAndSportsTrends();
-    const topTopics = combinedTopics.slice(0, 10);
+    
+    // Shuffle the topics to ensure variety and prevent duplicate hourly posts
+    const shuffledTopics = combinedTopics.sort(() => 0.5 - Math.random());
+    // Randomly select 5 topics instead of always picking index 0
+    const topTopics = shuffledTopics.slice(0, 5);
 
     if (topTopics.length === 0) {
       console.log('[Info] No trending topics found. Exiting.');

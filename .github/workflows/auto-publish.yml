@@ -22,8 +22,9 @@ jobs:
 
     - name: Run CraftZone Automation Script
       env:
-        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        WP_USERNAME: ${{ secrets.WP_USERNAME }}
-        WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
-        WP_URL: ${{ secrets.WP_URL }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || vars.GEMINI_API_KEY }}
+        WP_USERNAME: ${{ secrets.WP_USERNAME || vars.WP_USERNAME }}
+        WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD || vars.WP_APP_PASSWORD }}
+        WP_URL: ${{ secrets.WP_URL || vars.WP_URL }}
+        NEWSDATA_API_KEY: ${{ secrets.NEWSDATA_API_KEY || vars.NEWSDATA_API_KEY }}
       run: node index.js

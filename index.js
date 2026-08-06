@@ -399,12 +399,14 @@ async function processAndPublishArticle(item, index) {
       await publishToWordPress(topicResult);
     } catch (wpErr) {
       console.error(`  ↳ [Topic ${index}] [WordPress Error] Article publishing threw exception: ${wpErr.message}`);
+      process.exit(1);
     }
 
     return topicResult;
   } catch (topicError) {
     // Robust error handling: log and return null without crashing the batch
     console.error(`  ↳ [Topic ${index}] [Error] Failed processing topic "${item.title}": ${topicError.message}`);
+    process.exit(1);
     return null;
   }
 }
@@ -817,7 +819,7 @@ async function publishToWordPress(article) {
       ? `HTTP ${error.response.status} - ${JSON.stringify(error.response.data)}`
       : error.message;
     console.error(`  ↳ [WordPress Error] Failed publishing for "${article?.title}": ${errDetail}`);
-    // Continue without crashing the script
+    process.exit(1);
   }
 }
 

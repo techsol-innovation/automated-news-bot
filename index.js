@@ -48,6 +48,7 @@ async function preloadWordPressTaxonomies() {
     console.log(`[Info] Preloaded ${wpCategoriesMap.size} categories and ${wpTagsMap.size} tags.`);
   } catch (error) {
     console.error(`[Error] Failed to preload taxonomies: ${error.message}`);
+    process.exit(1);
   }
 }
 
@@ -263,6 +264,7 @@ async function getCombinedEntertainmentAndSportsTrends() {
   } catch (error) {
     const errMsg = error.response?.data?.results?.message || error.response?.data?.message || error.message;
     console.error(`[Error] Failed to fetch NewsData.io API: ${errMsg}`);
+    process.exit(1);
     return [];
   }
 }
@@ -346,6 +348,7 @@ async function processAndPublishArticle(item, index) {
     const combinedText = `--- ARTICLE: ${item.title} (${item.link}) ---\n${rawText}`;
     
     console.log(`  ↳ [Topic ${index}] Generating SEO article via Gemini AI...`);
+    console.log("Step 3: Generating Article with Gemini AI...");
     const generatedOutput = await generateArticles(item.title, combinedText);
 
     // Parse Gemini JSON output
@@ -395,6 +398,7 @@ async function processAndPublishArticle(item, index) {
 
     // Publish Article directly to WordPress as draft
     console.log(`  ↳ [Topic ${index}] Pushing Article to WordPress as draft...`);
+    console.log("Step 4: Publishing Article to WordPress...");
     try {
       await publishToWordPress(topicResult);
     } catch (wpErr) {
@@ -418,8 +422,10 @@ async function processAndPublishArticle(item, index) {
 async function fetchAndScrapeTrends() {
   try {
     // 1. Preload global state to avoid redundant API hits for categories/tags
+    console.log("Step 1: Preloading WordPress Taxonomies...");
     await preloadWordPressTaxonomies();
 
+    console.log("Step 2: Fetching Trends from NewsData API...");
     const combinedTopics = await getCombinedEntertainmentAndSportsTrends();
     const topTopics = combinedTopics.slice(0, 10);
 

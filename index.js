@@ -59,6 +59,42 @@ async function preloadWordPressTaxonomies() {
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
+ * Forces an image URL to return a high-resolution version by stripping thumbnail modifiers
+ * and upgrading width/height query parameters.
+ * @param {string} url - The original image URL
+ * @returns {string} - The high-resolution image URL
+ */
+function getHighResImageUrl(url) {
+  if (!url) return url;
+  try {
+    let newUrl = url;
+    // Strip WordPress or standard thumbnail size modifiers (e.g. image-150x150.jpg -> image.jpg)
+    newUrl = newUrl.replace(/-\d{2,4}x\d{2,4}(\.[a-zA-Z0-9]+(?:\?.*)?)$/i, '$1');
+    
+    const parsedUrl = new URL(newUrl);
+    
+    // Upgrade common CDN resizing parameters
+    const paramsToEnlarge = ['w', 'width', 'h', 'height', 'resize', 'fit'];
+    paramsToEnlarge.forEach(param => {
+      if (parsedUrl.searchParams.has(param)) {
+        if (param === 'w' || param === 'width') {
+          parsedUrl.searchParams.set(param, '1200');
+        } else if (param === 'h' || param === 'height') {
+          parsedUrl.searchParams.set(param, '800');
+        } else {
+          parsedUrl.searchParams.delete(param);
+        }
+      }
+    });
+    
+    return parsedUrl.toString();
+  } catch (e) {
+    // If URL parsing fails, return the cleaned string fallback
+    return url.replace(/-\d{2,4}x\d{2,4}(\.[a-zA-Z0-9]+(?:\?.*)?)$/i, '$1');
+  }
+}
+
+/**
  * Scrapes the text content of a single news article URL using axios and cheerio.
  * Selects all <p> (paragraph) tags and returns the clean text and word count.
  * @param {string} url - The article URL to visit
@@ -79,14 +115,17 @@ async function scrapeArticleText(url) {
     const $ = cheerio.load(response.data);
 
     // Extract main Open Graph image BEFORE removing DOM elements
-    const image1 = $('meta[property="og:image"]').attr('content') || '';
+    const image1 = getHighResImageUrl($('meta[property="og:image"]').attr('content') || '');
     
     // Extract body images (up to 4 valid distinct images)
     const bodyImages = [];
     $('img').each((_, element) => {
       let src = $(element).attr('src');
-      if (src && !src.startsWith('data:image') && !src.includes('pixel') && !src.includes('icon') && !bodyImages.includes(src)) {
-        bodyImages.push(src);
+      if (src && !src.startsWith('data:image') && !src.includes('pixel') && !src.includes('icon')) {
+        const cleanSrc = getHighResImageUrl(src);
+        if (!bodyImages.includes(cleanSrc)) {
+          bodyImages.push(cleanSrc);
+        }
       }
     });
     
@@ -394,8 +433,8 @@ async function processAndPublishArticle(item, index) {
       topic: item.title,
       title: parsedGemini?.title || `${item.title}`,
       content: parsedGemini?.content || '',
-      image1: item.image_url || '',
-      bodyImages: (scraped.wordCount > 0 && Array.isArray(scraped.bodyImages) && scraped.bodyImages.length > 0) ? scraped.bodyImages : [item.image_url],
+      image1: getHighResImageUrl(item.image_url || ''),
+      bodyImages: (scraped.wordCount > 0 && Array.isArray(scraped.bodyImages) && scraped.bodyImages.length > 0) ? scraped.bodyImages : [getHighResImageUrl(item.image_url)],
       bodyImageAltTags: Array.isArray(parsedGemini?.body_image_alt_tags) ? parsedGemini.body_image_alt_tags : [],
       parent_category: parentCategory,
       sub_categories: subCategories,
@@ -657,7 +696,7 @@ async function generateThumbnail(imageUrl, thumbnailText) {
       ctx.shadowOffsetY = 0;
     }
     
-    return canvas.toBuffer('image/jpeg', { quality: 0.95 });
+    return canvas.toBuffer('image/jpeg', { quality: 1.0 });
   } catch (error) {
     console.error(`  ↳ [Thumbnail Gen Error] Failed to generate thumbnail: ${error.message}`);
     throw error;

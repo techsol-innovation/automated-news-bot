@@ -90,8 +90,8 @@ async function scrapeArticleText(url) {
       }
     });
     
-    // Keep at most 4 body images
-    const finalBodyImages = bodyImages.slice(0, 4);
+    // Keep at most 2 body images
+    const finalBodyImages = bodyImages.slice(0, 2);
 
     // Remove irrelevant elements before extracting paragraph text
     $('script, style, nav, footer, header, aside, iframe, noscript').remove();
@@ -163,8 +163,8 @@ STRICT INSTRUCTIONS:
   H2: [Data/Stats Section Title] -> Followed by the newly styled premium HTML table.
   H2: [Final Thoughts / Conclusion] -> Summarize and naturally include the focus keyword one last time.
 - Meaningful Lists: Use bullet points (<ul>) or numbered lists (<ol>) ONLY when breaking down complex ideas, itemizing facts, or listing achievements. Do not use them just for the sake of having a list.
-- Smart Image Placement & MULTI-IMAGE ALT TAGS: You must dynamically and organically insert multiple image placeholders: [INJECT_IMAGE_2_HERE], [INJECT_IMAGE_3_HERE], [INJECT_IMAGE_4_HERE], and [INJECT_IMAGE_5_HERE] throughout the HTML content. Place them where visual breaks make editorial sense (e.g. after a major H2 tag). Do NOT use generic <img> tags, ONLY use the exact string placeholders.
-- Alt Tags generation: You must generate a JSON array named body_image_alt_tags containing 4 strings. These strings must be highly descriptive, long-tail variations of the focus keyword to be used as alt text for the images.
+- Smart Image Placement & MULTI-IMAGE ALT TAGS: You must dynamically and organically insert exactly TWO image placeholders: [INJECT_IMAGE_2_HERE] and [INJECT_IMAGE_3_HERE] evenly throughout the HTML content. Place the first one after the first or second <h2> tag, and the second one further down the article. Do NOT use generic <img> tags, ONLY use the exact string placeholders.
+- Alt Tags generation: You must generate a JSON array named body_image_alt_tags containing exactly 2 strings. These strings must be highly descriptive, long-tail variations of the focus keyword to be used as alt text for the images.
 - Courtesy (Tone): Maintain a highly helpful, engaging, and welcoming tone.
 - Tags: Generate a JSON array named tags containing exactly 15 to 20 highly specific, long-tail SEO tags relevant to the article. Mix entity names, trending search queries (like 'Net Worth 2026'), associated people, and specific events. Do NOT use generic one-word tags. Integrate these naturally into the body text.
 - Category: Analyze the article and return TWO category fields: parent_category (string, e.g., 'Sports', 'Entertainment') and sub_categories (An ARRAY of strings). You MUST dynamically decide how many sub-categories are relevant.
@@ -182,7 +182,7 @@ CRITICAL OUTPUT REQUIREMENT: You MUST return ONLY valid JSON formatted strictly 
   "tags": ["Highly Specific Tag 1", "Person Net Worth 2026", "Associated Event 2026", "Trending Search Query 4"],
   "seo_description": "A compelling meta description",
   "thumbnail_text": "Shocking Truth Revealed!",
-  "body_image_alt_tags": ["long-tail-alt-1", "long-tail-alt-2", "long-tail-alt-3", "long-tail-alt-4"]
+  "body_image_alt_tags": ["long-tail-alt-1", "long-tail-alt-2"]
 }`;
 
   try {
@@ -789,7 +789,7 @@ async function publishToWordPress(article) {
     const bodyImages = Array.isArray(article.bodyImages) ? article.bodyImages : [];
     const altTags = Array.isArray(article.bodyImageAltTags) ? article.bodyImageAltTags : [];
     
-    for (let n = 2; n <= 5; n++) {
+    for (let n = 2; n <= 3; n++) {
       const placeholder = `[INJECT_IMAGE_${n}_HERE]`;
       if (formattedBody.includes(placeholder)) {
         const imageUrl = bodyImages[n - 2];

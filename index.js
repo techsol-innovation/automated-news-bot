@@ -804,7 +804,12 @@ async function publishToWordPress(article) {
     }
 
     // Filter out null IDs if category creation failed
-    const categoryIds = finalCategoryIds.filter(id => id !== null);
+    let categoryIds = finalCategoryIds.filter(id => id !== null);
+
+    // Strict category fallback: if AI generated categories fail and array is empty, default to 1 (e.g., 'News' category)
+    if (!categoryIds || categoryIds.length === 0) {
+      categoryIds = [1];
+    }
 
     // Get or create tag integer IDs
     const tagIds = await resolveTags(article.tags);
@@ -847,8 +852,9 @@ async function publishToWordPress(article) {
     const postContent = formattedBody;
     const wpEndpoint = `${process.env.WP_URL.replace(/\/$/, '')}/wp-json/wp/v2/posts`;
 
-    // Create a clean, short slug from the focus keyword (e.g., 'Michelle Pfeiffer' -> 'michelle-pfeiffer')
-    let seoSlug = article.focus_keyword.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+    // Create a clean slug from the full article title to ensure permalink matches title
+    let slugSource = article.title || article.focus_keyword || 'article';
+    let seoSlug = slugSource.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
     if (seoSlug.length > 74) {
       seoSlug = seoSlug.substring(0, 74).replace(/-+$/, '');
     }

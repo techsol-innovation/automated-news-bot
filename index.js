@@ -413,7 +413,9 @@ async function processAndPublishArticle(item, index) {
         : cleanedJsonStr;
       parsedGemini = JSON.parse(jsonSubstring);
     } catch (err) {
-      console.warn(`  ↳ [Topic ${index}] [Warning] Could not parse Gemini output as JSON directly. Attempting fallback text parsing...`);
+      console.error(`  ↳ [Topic ${index}] [JSON Parse Error] Gemini returned malformed JSON. Error: ${err.message}`);
+      console.error(`  ↳ [Topic ${index}] [Raw Gemini Output (first 500 chars)] ${generatedOutput ? generatedOutput.substring(0, 500) : '(empty)'}`);
+      console.warn(`  ↳ [Topic ${index}] Falling back to raw text as article content...`);
       parsedGemini = { 
         title: `${item.title}`, 
         content: generatedOutput, 
@@ -460,9 +462,12 @@ async function processAndPublishArticle(item, index) {
 
     return topicResult;
   } catch (topicError) {
-    // Robust error handling: log and return null without crashing the batch
-    console.error(`  ↳ [Topic ${index}] [Error] Failed processing topic "${item.title}": ${topicError.message}`);
-    process.exit(1);
+    // Robust error handling: log detailed info and skip this topic without killing the batch
+    const errDetail = topicError.response
+      ? `HTTP ${topicError.response.status} - ${JSON.stringify(topicError.response.data).substring(0, 300)}`
+      : topicError.message;
+    console.error(`  ↳ [Topic ${index}] [Error] Failed processing topic "${item.title}": ${errDetail}`);
+    console.error(`  ↳ [Topic ${index}] Skipping this topic and continuing with remaining topics...`);
     return null;
   }
 }
@@ -502,8 +507,14 @@ async function fetchAndScrapeTrends() {
         processAndPublishArticle(item, i + localIndex + 1)
       );
       
-      const batchResults = await Promise.all(batchPromises);
-      const successfulResults = batchResults.filter(Boolean);
+      const batchResults = await Promise.allSettled(batchPromises);
+      const successfulResults = batchResults
+        .filter(r => r.status === 'fulfilled' && r.value !== null)
+        .map(r => r.value);
+      const failedCount = batchResults.filter(r => r.status === 'rejected').length;
+      if (failedCount > 0) {
+        console.warn(`[Batch] ${failedCount} topic(s) failed in this batch but pipeline continues...`);
+      }
       allResults.push(...successfulResults);
 
       if (i + BATCH_SIZE < topTopics.length) {
@@ -521,10 +532,13 @@ async function fetchAndScrapeTrends() {
   } catch (error) {
     console.error('[Fatal Error] Unhandled exception in pipeline execution:');
     if (error.response) {
-      console.error(`HTTP Status ${error.response.status}: ${JSON.stringify(error.response.data)}`);
+      console.error(`  HTTP Status: ${error.response.status}`);
+      console.error(`  Response Body: ${JSON.stringify(error.response.data).substring(0, 500)}`);
     } else {
-      console.error(error.message || error);
+      console.error(`  Error Message: ${error.message || error}`);
+      console.error(`  Stack Trace: ${error.stack || '(no stack trace available)'}`);
     }
+    process.exit(1);
   }
 }
 
@@ -899,6 +913,21 @@ async function publishToWordPress(article) {
     process.exit(1);
   }
 }
+
+// Global safety net: catch any unhandled promise rejections so the Action fails visibly
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[Fatal] Unhandled Promise Rejection:');
+  console.error(`  Reason: ${reason?.message || reason}`);
+  console.error(`  Stack: ${reason?.stack || '(no stack)'}`);
+  process.exit(1);
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('[Fatal] Uncaught Exception:');
+  console.error(`  Error: ${error.message}`);
+  console.error(`  Stack: ${error.stack || '(no stack)'}`);
+  process.exit(1);
+});
 
 // Execute the script
 fetchAndScrapeTrends();

@@ -319,6 +319,74 @@ async function getCombinedEntertainmentAndSportsTrends() {
 }
 
 /**
+ * Deduplicates an array of topic objects by comparing title keywords.
+ * Two topics are considered duplicates if they share more than 50% of their significant words.
+ * @param {Array} topics - Array of topic objects with a 'title' property
+ * @returns {Array} Deduplicated array of topics
+ */
+function deduplicateTopics(topics) {
+  if (!Array.isArray(topics) || topics.length <= 1) return topics;
+
+  const stopWords = new Set(['the', 'a', 'an', 'is', 'are', 'was', 'were', 'in', 'on', 'at', 'to', 'for', 'of', 'and', 'or', 'but', 'with', 'by', 'from', 'as', 'it', 'its', 'this', 'that', 'has', 'have', 'had', 'not', 'be', 'been', 'will', 'would', 'could', 'should', 'may', 'might', 'can', 'do', 'does', 'did', 'just', 'about', 'after', 'before', 'over', 'under', 'between', 'into', 'out', 'up', 'down', 'new', 'says', 'said', 'also', 'than', 'more', 'most', 'very', 'how', 'what', 'when', 'where', 'who', 'which', 'why']);
+
+  function getKeywords(title) {
+    return title.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(w => w.length > 2 && !stopWords.has(w));
+  }
+
+  function similarity(kw1, kw2) {
+    if (kw1.length === 0 || kw2.length === 0) return 0;
+    const set1 = new Set(kw1);
+    const set2 = new Set(kw2);
+    let overlap = 0;
+    for (const word of set1) {
+      if (set2.has(word)) overlap++;
+    }
+    return overlap / Math.min(set1.size, set2.size);
+  }
+
+  const unique = [topics[0]];
+  const uniqueKeywords = [getKeywords(topics[0].title)];
+
+  for (let i = 1; i < topics.length; i++) {
+    const currentKw = getKeywords(topics[i].title);
+    let isDuplicate = false;
+    for (const existingKw of uniqueKeywords) {
+      if (similarity(currentKw, existingKw) > 0.5) {
+        isDuplicate = true;
+        break;
+      }
+    }
+    if (!isDuplicate) {
+      unique.push(topics[i]);
+      uniqueKeywords.push(currentKw);
+    } else {
+      console.log(`  ↳ [Dedup] Skipped similar topic: "${topics[i].title}"`);
+    }
+  }
+
+  console.log(`[Dedup] Reduced ${topics.length} topics to ${unique.length} unique topics.`);
+  return unique;
+}
+
+/**
+ * Pings IndexNow API to notify search engines about a newly published URL.
+ * Uses Bing's IndexNow endpoint (free, no API key required for basic pings).
+ * @param {string} postUrl - The full live URL of the published post
+ */
+async function pingIndexNow(postUrl) {
+  try {
+    const siteHost = new URL(process.env.WP_URL).host;
+    const indexNowUrl = `https://api.indexnow.org/IndexNow?url=${encodeURIComponent(postUrl)}&key=autopublisher&keyLocation=https://${siteHost}/autopublisher.txt`;
+
+    await axios.get(indexNowUrl, { timeout: 10000 });
+    console.log(`  ↳ [IndexNow] ✅ Pinged search engines for: ${postUrl}`);
+  } catch (err) {
+    // Non-fatal: don't crash if the ping fails
+    console.warn(`  ↳ [IndexNow] ⚠️ Ping failed (non-fatal): ${err.message}`);
+  }
+}
+
+/**
  * Helper function to get an existing WordPress category ID by name, or create it if not found.
  * Uses global wpCategoriesMap for in-memory caching to optimize performance.
  * @param {string} categoryName - The name of the category (e.g., 'Football', 'Hollywood')
@@ -514,8 +582,11 @@ async function fetchAndScrapeTrends() {
     console.log("Step 2: Fetching Trends from NewsData API...");
     const combinedTopics = await getCombinedEntertainmentAndSportsTrends();
     
+    // Deduplicate topics to prevent keyword cannibalization
+    const dedupedTopics = deduplicateTopics(combinedTopics);
+    
     // Shuffle the topics to ensure variety and prevent duplicate hourly posts
-    const shuffledTopics = combinedTopics.sort(() => 0.5 - Math.random());
+    const shuffledTopics = dedupedTopics.sort(() => 0.5 - Math.random());
     // Randomly select 5 topics instead of always picking index 0
     const topTopics = shuffledTopics.slice(0, 5);
 
@@ -575,7 +646,11 @@ async function fetchAndScrapeTrends() {
     for (const article of publishQueue) {
       try {
         console.log(`  ↳ Publishing: "${article.title}"...`);
-        await publishToWordPress(article);
+        const wpResponse = await publishToWordPress(article);
+        // Auto-ping IndexNow for instant search engine indexing
+        if (wpResponse && wpResponse.link) {
+          await pingIndexNow(wpResponse.link);
+        }
       } catch (wpErr) {
         console.error(`  ↳ [WordPress Error] Failed to publish "${article.title}": ${wpErr.message}`);
       }
@@ -604,8 +679,11 @@ async function fetchAndScrapeTrends() {
           if (valid) {
             try {
               console.log(`  ↳ [Retry] Publishing retried article: "${article.title}"...`);
-              await publishToWordPress(article);
+              const wpResponse = await publishToWordPress(article);
               publishQueue.push(article);
+              if (wpResponse && wpResponse.link) {
+                await pingIndexNow(wpResponse.link);
+              }
             } catch (wpErr) {
               console.error(`  ↳ [Retry WordPress Error] Failed to publish "${article.title}": ${wpErr.message}`);
             }
@@ -974,6 +1052,7 @@ async function publishToWordPress(article) {
     const payload = {
       title: article.title || 'Untitled Article',
       content: postContent,
+      excerpt: article.seo_description || '',
       status: 'publish',
       categories: categoryIds,
       tags: tagIds,

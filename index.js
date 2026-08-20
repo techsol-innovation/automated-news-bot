@@ -374,13 +374,54 @@ async function getOrCreateCategory(categoryName, parentId = 0) {
 }
 
 /**
- * Processes a single topic: scrapes, generates article, and publishes to WordPress.
- * Designed to be run in parallel.
+ * Validates a generated article object before it is published to WordPress.
+ * Checks for corrupted HTML content and low-quality images.
+ * @param {Object} article - The structured article object
+ * @param {number} index - Index for logging
+ * @returns {{ valid: boolean, reasons: string[] }}
+ */
+function validateArticle(article, index) {
+  const reasons = [];
+
+  // Content Check: flag if HTML contains raw JSON artifacts or starts with {
+  if (!article.content || article.content.trim().length < 100) {
+    reasons.push('Content is empty or too short (under 100 chars)');
+  }
+  const trimmedContent = (article.content || '').trim();
+  if (trimmedContent.startsWith('{') || trimmedContent.startsWith('[')) {
+    reasons.push('Content starts with raw JSON bracket');
+  }
+  if (/\{\s*"title"\s*:/.test(trimmedContent) || /\{\s*"content"\s*:/.test(trimmedContent)) {
+    reasons.push('Content contains raw JSON artifacts ({"title": or {"content":)');
+  }
+
+  // Image Check: flag low-quality or placeholder images
+  const imageUrl = (article.image1 || '').toLowerCase();
+  const badImageKeywords = ['logo', 'icon', 'placeholder', '1x1', 'spacer', 'blank', 'pixel'];
+  for (const keyword of badImageKeywords) {
+    if (imageUrl.includes(keyword)) {
+      reasons.push(`Featured image URL contains '${keyword}'`);
+      break;
+    }
+  }
+
+  const valid = reasons.length === 0;
+  if (!valid) {
+    console.warn(`  ↳ [QA ${index}] ❌ Validation FAILED for "${article.title}": ${reasons.join('; ')}`);
+  } else {
+    console.log(`  ↳ [QA ${index}] ✅ Validation PASSED for "${article.title}"`);
+  }
+  return { valid, reasons };
+}
+
+/**
+ * Processes a single topic: scrapes and generates article via Gemini.
+ * Does NOT publish. Returns the structured article for validation.
  * @param {Object} item - The topic object from NewsData
  * @param {number} index - Index for logging
  * @returns {Promise<Object|null>} The structured result or null on failure
  */
-async function processAndPublishArticle(item, index) {
+async function generateArticleFromTopic(item, index) {
   console.log(`[Topic Process ${index}] Processing: "${item.title}"`);
   
   try {
@@ -449,20 +490,8 @@ async function processAndPublishArticle(item, index) {
     };
 
     console.log(`  ↳ [Topic ${index}] ✅ Successfully structured Article ("${topicResult.title}" | Category: ${topicResult.parent_category} > [${topicResult.sub_categories.join(', ')}])`);
-
-    // Publish Article directly to WordPress as draft
-    console.log(`  ↳ [Topic ${index}] Pushing Article to WordPress as draft...`);
-    console.log("Step 4: Publishing Article to WordPress...");
-    try {
-      await publishToWordPress(topicResult);
-    } catch (wpErr) {
-      console.error(`  ↳ [Topic ${index}] [WordPress Error] Article publishing threw exception: ${wpErr.message}`);
-      process.exit(1);
-    }
-
     return topicResult;
   } catch (topicError) {
-    // Robust error handling: log detailed info and skip this topic without killing the batch
     const errDetail = topicError.response
       ? `HTTP ${topicError.response.status} - ${JSON.stringify(topicError.response.data).substring(0, 300)}`
       : topicError.message;
@@ -496,26 +525,42 @@ async function fetchAndScrapeTrends() {
     }
 
     console.log(`\n[Info] Starting ultra-fast parallel generation pipeline for ${topTopics.length} topics...\n`);
-    const allResults = [];
+    const publishQueue = [];  // Articles that passed validation
+    const retryQueue = [];    // { item, index } objects that failed validation
     const BATCH_SIZE = 3;
 
+    // ══════════════════════════════════════════════════════════════
+    // PHASE 1: Generate all articles and sort into publish/retry queues
+    // ══════════════════════════════════════════════════════════════
     for (let i = 0; i < topTopics.length; i += BATCH_SIZE) {
       const batch = topTopics.slice(i, i + BATCH_SIZE);
-      console.log(`\n[Batch] Processing topics ${i + 1} to ${Math.min(i + BATCH_SIZE, topTopics.length)} in parallel...`);
+      console.log(`\n[Batch] Generating topics ${i + 1} to ${Math.min(i + BATCH_SIZE, topTopics.length)} in parallel...`);
       
       const batchPromises = batch.map((item, localIndex) => 
-        processAndPublishArticle(item, i + localIndex + 1)
+        generateArticleFromTopic(item, i + localIndex + 1)
       );
       
       const batchResults = await Promise.allSettled(batchPromises);
-      const successfulResults = batchResults
-        .filter(r => r.status === 'fulfilled' && r.value !== null)
-        .map(r => r.value);
-      const failedCount = batchResults.filter(r => r.status === 'rejected').length;
-      if (failedCount > 0) {
-        console.warn(`[Batch] ${failedCount} topic(s) failed in this batch but pipeline continues...`);
+
+      for (let j = 0; j < batchResults.length; j++) {
+        const result = batchResults[j];
+        const originalItem = batch[j];
+        const globalIndex = i + j + 1;
+
+        if (result.status === 'fulfilled' && result.value !== null) {
+          const article = result.value;
+          const { valid } = validateArticle(article, globalIndex);
+          if (valid) {
+            publishQueue.push(article);
+          } else {
+            retryQueue.push({ item: originalItem, index: globalIndex });
+          }
+        } else {
+          const reason = result.status === 'rejected' ? result.reason?.message : 'returned null';
+          console.warn(`[Batch] Topic ${globalIndex} generation failed (${reason}), adding to retry queue...`);
+          retryQueue.push({ item: originalItem, index: globalIndex });
+        }
       }
-      allResults.push(...successfulResults);
 
       if (i + BATCH_SIZE < topTopics.length) {
         console.log(`[Batch] Waiting 3 seconds before next batch to respect API limits...`);
@@ -523,10 +568,63 @@ async function fetchAndScrapeTrends() {
       }
     }
 
+    // ══════════════════════════════════════════════════════════════
+    // PHASE 2: Publish all validated articles immediately
+    // ══════════════════════════════════════════════════════════════
+    console.log(`\n[Publish] Publishing ${publishQueue.length} validated article(s) to WordPress...`);
+    for (const article of publishQueue) {
+      try {
+        console.log(`  ↳ Publishing: "${article.title}"...`);
+        await publishToWordPress(article);
+      } catch (wpErr) {
+        console.error(`  ↳ [WordPress Error] Failed to publish "${article.title}": ${wpErr.message}`);
+      }
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // PHASE 3: Retry queue — regenerate failed articles one final time
+    // ══════════════════════════════════════════════════════════════
+    if (retryQueue.length > 0) {
+      console.log(`\n[Retry Queue] ${retryQueue.length} topic(s) failed validation. Running ONE final retry pass...`);
+      await delay(2000);
+
+      const retryPromises = retryQueue.map(({ item, index }) =>
+        generateArticleFromTopic(item, index)
+      );
+
+      const retryResults = await Promise.allSettled(retryPromises);
+
+      for (let k = 0; k < retryResults.length; k++) {
+        const result = retryResults[k];
+        const { item, index } = retryQueue[k];
+
+        if (result.status === 'fulfilled' && result.value !== null) {
+          const article = result.value;
+          const { valid, reasons } = validateArticle(article, index);
+          if (valid) {
+            try {
+              console.log(`  ↳ [Retry] Publishing retried article: "${article.title}"...`);
+              await publishToWordPress(article);
+              publishQueue.push(article);
+            } catch (wpErr) {
+              console.error(`  ↳ [Retry WordPress Error] Failed to publish "${article.title}": ${wpErr.message}`);
+            }
+          } else {
+            console.error(`  ↳ [Retry] ❌ Topic "${item.title}" failed validation AGAIN (${reasons.join('; ')}). Permanently skipped.`);
+          }
+        } else {
+          console.error(`  ↳ [Retry] ❌ Topic "${item.title}" failed generation on retry. Permanently skipped.`);
+        }
+      }
+    } else {
+      console.log(`\n[Retry Queue] All articles passed validation on first attempt. No retries needed. 🎉`);
+    }
+
     // Write final audit files to disk
+    const allResults = publishQueue;
     fs.writeFileSync('final_audit.json', JSON.stringify(allResults, null, 2), 'utf8');
     fs.writeFileSync('audit_data.json', JSON.stringify(allResults, null, 2), 'utf8');
-    console.log(`\n[Success] Pipeline complete. Generated ${allResults.length} articles across ${topTopics.length} topics.`);
+    console.log(`\n[Success] Pipeline complete. Published ${allResults.length} articles across ${topTopics.length} topics.`);
     console.log(`[Success] Audit files saved: final_audit.json and audit_data.json.`);
 
   } catch (error) {

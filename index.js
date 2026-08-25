@@ -173,11 +173,11 @@ async function scrapeArticleText(url) {
  * @returns {Promise<string>} The generated response text from Gemini
  */
 async function generateArticles(topicTitle, scrapedText) {
-  const prompt = `You are an elite Copywriter and Senior Editor. Your goal is to maximize traffic, reader retention, and search engine rankings using psychological triggers and the 7 C's of communication.
+  const prompt = `You are an award-winning Senior Journalist, Elite Copywriter, and SEO Strategist for a top-tier US entertainment and sports media brand. Your single goal is to write PREMIUM, deeply researched, magazine-quality content that earns 2000+ word counts, high dwell time, and dominates Google AI Overviews and Perplexity citations.
 I have scraped news about the trending topic: "${topicTitle}". Extracted text:
 ${scrapedText}
 
-Write a high-quality news article based on the provided text.
+Write a high-quality, deeply detailed news article based on the provided text.
 
 STRICT INSTRUCTIONS:
 - Keyword Generation First: Generate a strict 1-2 word focus_keyword.
@@ -186,7 +186,10 @@ STRICT INSTRUCTIONS:
   2. seo_description: The very first words of this description MUST be the exact focus_keyword. The description MUST be strictly between 120 and 160 characters long.
   3. slug: The URL slug MUST contain the exact focus_keyword (lowercase, hyphenated).
   4. content: Ensure the exact focus_keyword appears naturally in the very first sentence of the HTML content (First 10% rule).
-- Content Expansion Blueprint (To force 1500+ words): CRITICAL SEO RULE: You MUST write a comprehensive, highly detailed article that is strictly OVER 1500 words long. Expand on sections with deep analysis, trivia, and background information. You MUST structure the HTML with exactly 5 to 6 distinct <h2> headings. Under EACH <h2> heading, you MUST write at least 6 detailed paragraphs or use <h3> sub-sections.
+- Content Expansion Blueprint (STRICT 2000+ WORDS MINIMUM): CRITICAL SEO RULE: You MUST write a comprehensive, deeply researched, magazine-quality article that is STRICTLY OVER 2000 words long. This is non-negotiable. To hit this target, you MUST: (a) Include background context and history. (b) Add unique angles, insider facts, and data that competitors are NOT covering. (c) Explore multiple perspectives on the story. You MUST structure the HTML with exactly 5 to 6 distinct <h2> headings. Under EACH <h2> heading, you MUST write at least 4-6 detailed paragraphs or use <h3> sub-sections with supporting evidence.
+- DEEP-DIVE EXPERT ANALYSIS: Under at least 2 of your <h2> sections, you MUST include an 'Expert Take' or 'By The Numbers' angle — a paragraph that synthesizes specific statistics, historical context, or a unique expert perspective that the average reader cannot find on a basic news site. This is your content's competitive moat.
+- KEY TAKEAWAYS BOX: At the very top of the content (before the first paragraph), inject a styled HTML 'Key Takeaways' box using this exact template: <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); border-left: 4px solid #e94560; padding: 20px 25px; margin-bottom: 30px; border-radius: 4px;"><h3 style="color: #e94560; margin-top: 0; font-size: 1em; text-transform: uppercase; letter-spacing: 1px;">⚡ Key Takeaways</h3><ul style="color: #eaeaea; margin: 0; padding-left: 20px; line-height: 1.8;">BULLET_POINTS_HERE</ul></div>. Generate 3-5 bullet points summarizing the most shocking/important facts of the article. This increases dwell time and reduces bounce rate.
+- FAQ SECTION (Schema-Ready): You MUST include a dedicated FAQ section as the SECOND TO LAST section (before the final conclusion H2). Use this exact structure: <h2>Frequently Asked Questions</h2> followed by 3-4 question-answer pairs, each using <h3> for the question and a <p> for the answer. These FAQs MUST directly answer the exact search queries a user would type into Google about this topic. This boosts Google AI Overview and FAQ rich snippet eligibility.
 - Keyword Density Enforcer: Maintain a natural keyword density of strictly 1% to 1.5%.
 - SEO Linking & Formatting Rules: Embed exactly 1 to 2 EXTERNAL links to high-authority sites (like Wikipedia, Reuters, ESPN, IMDb) in the content using proper <a> tags to back up factual claims. The generated HTML must contain exactly one internal link to https://brightcelebrity.com/. Bold the focus keyword at least twice.
 - HEADING STRUCTURE (CRITICAL): NEVER use an <h1> tag. Main sections MUST be <h2>. Sub-sections MUST be <h3>. NEVER skip heading levels (e.g., jumping from H2 to H4). All headings MUST be concise and punchy (3 to 6 words). Naturally include the exact focus keyword in exactly 1 or 2 of the <h2> headings.
@@ -198,10 +201,13 @@ STRICT INSTRUCTIONS:
 - Concreteness & Correctness: Use specific data, clear facts, and sensory words. Ensure flawless grammar.
 - PREMIUM TABLE STYLING: Whenever you generate an HTML table, inject premium inline CSS: <table style="width: 100%; border-collapse: collapse; margin: 25px 0; font-size: 1em; font-family: sans-serif; box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);">. The table header: <thead style="background-color: #2c3e50; color: #ffffff; text-align: left;">. Cells: style="padding: 12px 15px; border-bottom: 1px solid #dddddd;".
 - STRICT ARTICLE TEMPLATE: To maintain a consistent 95+ SEO score, you MUST follow this exact HTML structure:
+  [KEY TAKEAWAYS BOX] -> Place the styled Key Takeaways <div> here, before the first paragraph.
   Introduction: 2-3 short paragraphs containing the exact focus keyword in the first sentence.
-  H2: [Catchy Section Title with Focus Keyword] -> Followed by detailed paragraphs.
-  H3: [Sub-topic] -> Followed by bullet points.
+  H2: [Catchy Section Title with Focus Keyword] -> Followed by detailed paragraphs with deep analysis.
+  H3: [Sub-topic] -> Followed by bullet points or expert insights.
   H2: [Data/Stats Section Title] -> Followed by the newly styled premium HTML table.
+  H2: [Background & Context] -> Deep-dive history, expert take, or 'By The Numbers' section.
+  H2: Frequently Asked Questions -> 3-4 H3 questions with <p> answers (schema-ready).
   H2: [Final Thoughts / Conclusion] -> Summarize and naturally include the focus keyword one last time.
 - Meaningful Lists: Use bullet points (<ul>) or numbered lists (<ol>) ONLY when breaking down complex ideas, itemizing facts, or listing achievements. Do not use them just for the sake of having a list.
 - Smart Image Placement & MULTI-IMAGE ALT TAGS: You must dynamically and organically insert exactly TWO image placeholders: [INJECT_IMAGE_2_HERE] and [INJECT_IMAGE_3_HERE] evenly throughout the HTML content. Place the first one after the first or second <h2> tag, and the second one further down the article. Do NOT use generic <img> tags, ONLY use the exact string placeholders.
@@ -589,8 +595,8 @@ async function fetchAndScrapeTrends() {
     
     // Shuffle the topics to ensure variety and prevent duplicate hourly posts
     const shuffledTopics = dedupedTopics.sort(() => 0.5 - Math.random());
-    // Randomly select 5 topics instead of always picking index 0
-    const topTopics = shuffledTopics.slice(0, 5);
+    // Select top 3 topics — quality over quantity: fewer articles, higher depth
+    const topTopics = shuffledTopics.slice(0, 3);
 
     if (topTopics.length === 0) {
       console.log('[Info] No trending topics found. Exiting.');
@@ -600,7 +606,7 @@ async function fetchAndScrapeTrends() {
     console.log(`\n[Info] Starting ultra-fast parallel generation pipeline for ${topTopics.length} topics...\n`);
     const publishQueue = [];  // Articles that passed validation
     const retryQueue = [];    // { item, index } objects that failed validation
-    const BATCH_SIZE = 3;
+    const BATCH_SIZE = 3; // All 3 articles generated in one parallel batch — no inter-batch delay needed
 
     // ══════════════════════════════════════════════════════════════
     // PHASE 1: Generate all articles and sort into publish/retry queues

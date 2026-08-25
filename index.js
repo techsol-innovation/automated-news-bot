@@ -95,6 +95,36 @@ function getHighResImageUrl(url) {
 }
 
 /**
+ * Checks whether an image URL is a valid editorial photograph.
+ * Rejects logos, icons, banners, SVGs, GIFs, and known clickbait image patterns.
+ * @param {string} url - The image URL to check
+ * @returns {boolean} true if the image is acceptable for publication
+ */
+function isValidEditorialImage(url) {
+  if (!url || typeof url !== 'string' || url.trim() === '') return false;
+  const lower = url.toLowerCase();
+
+  // Reject by URL substring — logos, branding assets, overlays
+  const BAD_SUBSTRINGS = [
+    'logo', '_white', 'icon', 'avatar', 'button', 'banner',
+    'sponsor', 'transparent', 'placeholder', '1x1', 'spacer',
+    'blank', 'pixel', 'meme', 'youtube', 'typography'
+  ];
+  for (const kw of BAD_SUBSTRINGS) {
+    if (lower.includes(kw)) return false;
+  }
+
+  // Reject by file extension — vector graphics and animations are never editorial photos
+  const BAD_EXTENSIONS = ['.svg', '.gif'];
+  const urlWithoutQuery = lower.split('?')[0];
+  for (const ext of BAD_EXTENSIONS) {
+    if (urlWithoutQuery.endsWith(ext)) return false;
+  }
+
+  return true;
+}
+
+/**
  * Scrapes the text content of a single news article URL using axios and cheerio.
  * Selects all <p> (paragraph) tags and returns the clean text and word count.
  * @param {string} url - The article URL to visit
@@ -117,13 +147,13 @@ async function scrapeArticleText(url) {
     // Extract main Open Graph image BEFORE removing DOM elements
     const image1 = getHighResImageUrl($('meta[property="og:image"]').attr('content') || '');
     
-    // Extract body images (up to 4 valid distinct images)
+    // Extract body images (up to 4 valid distinct editorial images)
     const bodyImages = [];
     $('img').each((_, element) => {
       let src = $(element).attr('src');
-      if (src && !src.startsWith('data:image') && !src.includes('pixel') && !src.includes('icon')) {
+      if (src && !src.startsWith('data:image')) {
         const cleanSrc = getHighResImageUrl(src);
-        if (!bodyImages.includes(cleanSrc)) {
+        if (isValidEditorialImage(cleanSrc) && !bodyImages.includes(cleanSrc)) {
           bodyImages.push(cleanSrc);
         }
       }
@@ -294,9 +324,9 @@ async function getCombinedEntertainmentAndSportsTrends() {
     const sportsResults = sportsResp.data?.results || [];
     const entResults = entResp.data?.results || [];
 
-    // Filter the results array to keep only articles where image_url is NOT null
-    const sportsFiltered = sportsResults.filter(item => item && item.image_url !== null && item.image_url !== undefined && item.image_url !== '');
-    const entFiltered = entResults.filter(item => item && item.image_url !== null && item.image_url !== undefined && item.image_url !== '');
+    // Filter the results array to keep only articles with valid editorial image_urls
+    const sportsFiltered = sportsResults.filter(item => item && isValidEditorialImage(item.image_url));
+    const entFiltered = entResults.filter(item => item && isValidEditorialImage(item.image_url));
 
     // Extract top 5 articles for Sports and top 5 for Entertainment
     const sportsTopics = sportsFiltered.slice(0, 5).map(item => ({
@@ -471,13 +501,32 @@ function validateArticle(article, index) {
     reasons.push('Content contains raw JSON artifacts ({"title": or {"content":)');
   }
 
-  // Image Check: flag low-quality or placeholder images
+  // Image Check: strict editorial image validation for featured image
   const imageUrl = (article.image1 || '').toLowerCase();
-  const badImageKeywords = ['logo', 'icon', 'placeholder', '1x1', 'spacer', 'blank', 'pixel'];
-  for (const keyword of badImageKeywords) {
+  const BAD_IMAGE_KEYWORDS = [
+    'logo', '_white', 'icon', 'avatar', 'button', 'banner', 'sponsor',
+    'transparent', 'placeholder', '1x1', 'spacer', 'blank', 'pixel',
+    'meme', 'youtube', 'typography'
+  ];
+  for (const keyword of BAD_IMAGE_KEYWORDS) {
     if (imageUrl.includes(keyword)) {
-      reasons.push(`Featured image URL contains '${keyword}'`);
+      reasons.push(`Featured image URL contains rejected keyword '${keyword}'`);
       break;
+    }
+  }
+  // Reject SVG and GIF formats
+  const imageWithoutQuery = imageUrl.split('?')[0];
+  if (imageWithoutQuery.endsWith('.svg') || imageWithoutQuery.endsWith('.gif')) {
+    reasons.push('Featured image is SVG or GIF — not an editorial photograph');
+  }
+
+  // Body image check: ensure none of the 2 body images are bad
+  if (Array.isArray(article.bodyImages)) {
+    for (const bUrl of article.bodyImages) {
+      if (!isValidEditorialImage(bUrl)) {
+        reasons.push(`Body image rejected (failed editorial check): ${bUrl.substring(0, 80)}`);
+        break;
+      }
     }
   }
 

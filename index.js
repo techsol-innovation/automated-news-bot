@@ -47,7 +47,10 @@ async function preloadWordPressTaxonomies() {
 
     console.log(`[Info] Preloaded ${wpCategoriesMap.size} categories and ${wpTagsMap.size} tags.`);
   } catch (error) {
-    console.error(`[Error] Failed to preload taxonomies: ${error.message}`);
+    const errDetail = error.response
+      ? `HTTP ${error.response.status} - ${JSON.stringify(error.response.data)}`
+      : (error.message || JSON.stringify(error));
+    console.error(`[Error] Failed to preload taxonomies: ${errDetail}`);
     process.exit(1);
   }
 }

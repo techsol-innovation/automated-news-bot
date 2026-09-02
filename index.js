@@ -33,10 +33,17 @@ async function preloadWordPressTaxonomies() {
     const token = Buffer.from(credentials).toString('base64');
     const headers = { 'Authorization': `Basic ${token}` };
     const wpBaseUrl = process.env.WP_URL.replace(/\/$/, '');
+    
+    // Categories and Tags are public endpoints. We omit the Authorization header on GET requests 
+    // because caching layers (like Cloudflare/WP Rocket) often strip it, causing WordPress to 
+    // fallback to cookie auth and throw 'rest_cookie_invalid_nonce' 403 errors on GitHub Actions.
+    const getHeaders = { 
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' 
+    };
 
     const [catResp, tagResp] = await Promise.all([
-      axios.get(`${wpBaseUrl}/wp-json/wp/v2/categories?per_page=100`, { headers }),
-      axios.get(`${wpBaseUrl}/wp-json/wp/v2/tags?per_page=100`, { headers })
+      axios.get(`${wpBaseUrl}/wp-json/wp/v2/categories?per_page=100&_nocache=${Date.now()}`, { headers: getHeaders }),
+      axios.get(`${wpBaseUrl}/wp-json/wp/v2/tags?per_page=100&_nocache=${Date.now()}`, { headers: getHeaders })
     ]);
 
     const categories = catResp.data || [];

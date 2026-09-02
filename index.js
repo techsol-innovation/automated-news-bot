@@ -863,6 +863,7 @@ async function fetchAndScrapeTrends() {
         // Auto-ping IndexNow for instant search engine indexing
         if (wpResponse && wpResponse.link) {
           await pingIndexNow(wpResponse.link);
+          fs.appendFileSync('latest_url.txt', wpResponse.link + '\n');
         }
       } catch (wpErr) {
         console.error(`  ↳ [WordPress Error] Failed to publish "${article.title}": ${wpErr.message}`);
@@ -896,6 +897,7 @@ async function fetchAndScrapeTrends() {
               publishQueue.push(article);
               if (wpResponse && wpResponse.link) {
                 await pingIndexNow(wpResponse.link);
+                fs.appendFileSync('latest_url.txt', wpResponse.link + '\n');
               }
             } catch (wpErr) {
               console.error(`  ↳ [Retry WordPress Error] Failed to publish "${article.title}": ${wpErr.message}`);

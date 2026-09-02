@@ -6,6 +6,9 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { createCanvas, loadImage } = require('canvas');
 const FormData = require('form-data');
 
+// DRY RUN FLAG: Set to true to bypass WordPress publishing and just log payloads
+const DRY_RUN = true;
+
 // Initialize Gemini client and model
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 const geminiModel = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
@@ -556,6 +559,10 @@ function deduplicateTopics(topics) {
  * @param {string} postUrl - The full live URL of the published post
  */
 async function pingIndexNow(postUrl) {
+  if (DRY_RUN) {
+    console.log(`  ↳ [IndexNow] DRY RUN: Bypassing ping for ${postUrl}`);
+    return;
+  }
   try {
     const siteHost = new URL(process.env.WP_URL).host;
     const indexNowUrl = `https://api.indexnow.org/IndexNow?url=${encodeURIComponent(postUrl)}&key=autopublisher&keyLocation=https://${siteHost}/autopublisher.txt`;
@@ -1292,6 +1299,22 @@ async function publishToWordPress(article) {
 
     if (mediaId) {
       payload.featured_media = mediaId;
+    }
+
+    if (DRY_RUN) {
+      console.log('\n================ DRY RUN PAYLOAD ================');
+      console.log(`Title: ${payload.title}`);
+      console.log(`Category IDs: ${payload.categories}`);
+      console.log(`Slug: ${payload.slug}`);
+      if (article.topicType === 'net_worth') {
+        console.log('\n--- NET WORTH PAYLOAD DETAILS ---');
+        console.log(JSON.stringify(payload, null, 2));
+      } else {
+         console.log('\n--- NEWS PAYLOAD EXCERPT (Truncated) ---');
+         console.log(JSON.stringify({ ...payload, content: payload.content.substring(0, 500) + '...' }, null, 2));
+      }
+      console.log('=================================================\n');
+      return { id: 999999, link: 'https://example.com/dry-run-post' };
     }
 
     const response = await axios.post(wpEndpoint, payload, {

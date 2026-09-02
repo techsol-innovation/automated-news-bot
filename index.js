@@ -281,7 +281,7 @@ ${faqBlock}
 - PREMIUM TABLE STYLING: Whenever you generate an HTML table, inject premium inline CSS: <table style="width: 100%; border-collapse: collapse; margin: 25px 0; font-size: 1em; font-family: sans-serif; box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);">. The table header: <thead style="background-color: #2c3e50; color: #ffffff; text-align: left;">. Cells: style="padding: 12px 15px; border-bottom: 1px solid #dddddd;".
 - STRICT ARTICLE TEMPLATE: To maintain a consistent 95+ SEO score, you MUST follow this exact HTML structure:
   [KEY TAKEAWAYS BOX] -> Place the styled Key Takeaways <div> here, before the first paragraph.
-  ${isNetWorth ? '[QUICK NET WORTH SNAPSHOT BOX] -> Place the styled snapshot <div> here, right after Key Takeaways.' : ''}
+  ${isNetWorth ? `[QUICK NET WORTH SNAPSHOT BOX] -> Place the styled snapshot <div> here, right after Key Takeaways.` : ``}
   Introduction: 2-3 short paragraphs containing the exact focus keyword in the first sentence.
   H2: [Catchy Section Title with Focus Keyword] -> Followed by detailed paragraphs with deep analysis.
   H3: [Sub-topic] -> Followed by bullet points or expert insights.
@@ -387,7 +387,6 @@ async function fetchRawUSNewsTrends() {
   } catch (error) {
     const errMsg = error.response?.data?.results?.message || error.response?.data?.message || error.message;
     console.error(`[Error] Failed to fetch NewsData.io API: ${errMsg}`);
-    process.exit(1);
     return { sportsFiltered: [], entFiltered: [] };
   }
 }
@@ -1295,10 +1294,6 @@ async function publishToWordPress(article) {
       payload.featured_media = mediaId;
     }
 
-    console.log('IMPORTANT: Ensure rank_math_title is registered in your WP functions.php snippet to allow REST API updates.');
-
-    console.log('🚀 DEBUG PAYLOAD:', JSON.stringify({ title: payload.title, meta: payload.meta, focus_keyword_from_ai: article.focus_keyword }, null, 2));
-
     const response = await axios.post(wpEndpoint, payload, {
       headers: {
         'Authorization': `Basic ${token}`,
@@ -1313,7 +1308,7 @@ async function publishToWordPress(article) {
       ? `HTTP ${error.response.status} - ${JSON.stringify(error.response.data)}`
       : error.message;
     console.error(`  ↳ [WordPress Error] Failed publishing for "${article?.title}": ${errDetail}`);
-    process.exit(1);
+    throw new Error(errDetail);
   }
 }
 

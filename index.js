@@ -286,9 +286,9 @@ ${faqBlock}
   H2: [Catchy Section Title with Focus Keyword] -> Followed by detailed paragraphs with deep analysis.
   H3: [Sub-topic] -> Followed by bullet points or expert insights.
   H2: [Data/Stats Section Title] -> Followed by the newly styled premium HTML table.
-  ${isNetWorth ? 'H2: [Income Sources & Earnings Breakdown] -> Premium HTML table with all income streams.
+  ${isNetWorth ? `H2: [Income Sources & Earnings Breakdown] -> Premium HTML table with all income streams.
   H2: [Car Collection & Real Estate] -> Structured bullet points for assets.
-  H2: [Brand Endorsements & Business Ventures] -> Bullet points with deal values.' : 'H2: [Background & Context] -> Deep-dive history, expert take, or \'By The Numbers\' section.'}
+  H2: [Brand Endorsements & Business Ventures] -> Bullet points with deal values.` : `H2: [Background & Context] -> Deep-dive history, expert take, or 'By The Numbers' section.`}
   H2: People Also Ask -> 4-5 Schema.org structured Q&A pairs (FAQPage schema-ready).
   H2: [Final Thoughts / Conclusion] -> Summarize and naturally include the focus keyword one last time.
 - Meaningful Lists: Use bullet points (<ul>) or numbered lists (<ol>) ONLY when breaking down complex ideas, itemizing facts, or listing achievements. Do not use them just for the sake of having a list.

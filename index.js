@@ -197,17 +197,62 @@ async function scrapeArticleText(url) {
 }
 
 /**
- * Sends combined scraped text to Gemini to generate 2 distinct SEO-optimized articles with category names.
+ * Sends combined scraped text to Gemini to generate a deeply detailed SEO-optimized article.
+ * Detects 'Net Worth' topic type and injects structured formatting rules accordingly.
  * @param {string} topicTitle - The name/title of the trending topic
  * @param {string} scrapedText - Combined text scraped from associated articles
+ * @param {string} [topicType] - Optional topic type hint ('net_worth' triggers table/bullet formatting)
  * @returns {Promise<string>} The generated response text from Gemini
  */
-async function generateArticles(topicTitle, scrapedText) {
+async function generateArticles(topicTitle, scrapedText, topicType = 'news') {
+  // ── Net Worth Detection ──
+  const isNetWorth = topicType === 'net_worth' ||
+    /net\s*worth|salary|earnings|income|how\s*much.*make/i.test(topicTitle);
+
+  // ── Conditional Net Worth Formatting Block ──
+  const netWorthFormattingBlock = isNetWorth ? `
+- ⚠️ NET WORTH ARTICLE — STRICT FORMATTING RULES (ZERO TOLERANCE):
+  This topic is a dedicated Net Worth / Lifestyle article. You MUST follow these rules with ZERO exceptions:
+  1. ABSOLUTELY NO DENSE PARAGRAPHS for financial breakdowns. Every financial figure MUST live inside a structured element.
+  2. Use a premium styled HTML Table (with the premium table CSS specified below) to display:
+     - Income Sources Breakdown (e.g., Salary, Endorsements, Business Ventures, Investments)
+     - Year-by-Year Net Worth Growth (columns: Year | Estimated Net Worth | Key Event)
+     - Asset Breakdown (Real Estate, Vehicles, Investments value)
+  3. Use structured HTML bullet points (<ul><li>) for:
+     - Car Collection (make, model, estimated value per vehicle)
+     - Real Estate Portfolio (property name, location, estimated value)
+     - Brand Endorsement Deals (brand name, deal value, duration)
+     - Lifestyle Highlights (private jets, yachts, watches, fashion)
+  4. Keep every section HIGHLY SCANNABLE — use <h3> sub-headings liberally (e.g., 'Car Collection', 'Real Estate Empire', 'Endorsement Deals').
+  5. The article MUST feel like a premium Forbes/Celebrity Net Worth breakdown, NOT a generic biography.
+  6. Include at least TWO premium styled HTML tables in the article.
+  7. Add a 'Quick Net Worth Snapshot' box right after the Key Takeaways using: <div style="background: #0f1923; border: 1px solid #2c3e50; padding: 20px; margin-bottom: 25px; border-radius: 6px;"><h3 style="color: #FFD700; margin-top: 0;">💰 Quick Net Worth Snapshot</h3><ul style="color: #eaeaea; line-height: 2;">SNAPSHOT_BULLETS_HERE</ul></div> with bullets for: Full Name, Net Worth (2026 est.), Primary Income Source, Nationality, and Age.
+` : '';
+
+  // ── PAA-Style FAQ Block (Always Active) ──
+  const faqBlock = `- FAQ SECTION — 'PEOPLE ALSO ASK' OPTIMIZATION (Schema-Ready):
+  You MUST include a dedicated FAQ section as the SECOND TO LAST section (before the final conclusion H2).
+  Use this exact HTML structure for FAQPage Schema integration:
+  <h2>People Also Ask</h2>
+  Followed by 4-5 question-answer pairs. Each pair MUST use:
+  <div itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+    <h3 itemprop="name">[THE QUESTION]</h3>
+    <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+      <p itemprop="text">[THE ANSWER - 2-3 sentences, direct and factual]</p>
+    </div>
+  </div>
+  CRITICAL FAQ RULES:
+  - Questions MUST mirror REAL US user search intent and Google 'People Also Ask' patterns.
+  - Use hyper-specific, long-tail question formats that real Americans type into Google.
+  ${isNetWorth ? `- For this Net Worth article, use questions like: 'How much does [Person] make per [game/movie/episode]?', 'What is [Person]\'s most expensive car?', 'How much did [Person] pay for their mansion?', 'What brands does [Person] endorse?', 'Is [Person] richer than [comparable person]?'` : `- For this news article, use questions like: 'What happened with [topic] today?', 'Why is [person/event] trending right now?', 'How does this affect [related context]?', 'When is [upcoming related event]?'`}
+  - NEVER use generic questions. Every question must be answerable with a specific fact from the article.
+  - The entire FAQ section MUST be wrapped in: <div itemscope itemtype="https://schema.org/FAQPage">...</div>`;
+
   const prompt = `You are an award-winning Senior Journalist, Elite Copywriter, and SEO Strategist for a top-tier US entertainment and sports media brand. Your single goal is to write PREMIUM, deeply researched, magazine-quality content that earns 2000+ word counts, high dwell time, and dominates Google AI Overviews and Perplexity citations.
 I have scraped news about the trending topic: "${topicTitle}". Extracted text:
 ${scrapedText}
 
-Write a high-quality, deeply detailed news article based on the provided text.
+Write a high-quality, deeply detailed ${isNetWorth ? 'Net Worth & Lifestyle breakdown' : 'news'} article based on the provided text.
 
 STRICT INSTRUCTIONS:
 - Keyword Generation First: Generate a strict 1-2 word focus_keyword.
@@ -219,7 +264,8 @@ STRICT INSTRUCTIONS:
 - Content Expansion Blueprint (STRICT 2000+ WORDS MINIMUM): CRITICAL SEO RULE: You MUST write a comprehensive, deeply researched, magazine-quality article that is STRICTLY OVER 2000 words long. This is non-negotiable. To hit this target, you MUST: (a) Include background context and history. (b) Add unique angles, insider facts, and data that competitors are NOT covering. (c) Explore multiple perspectives on the story. You MUST structure the HTML with exactly 5 to 6 distinct <h2> headings. Under EACH <h2> heading, you MUST write at least 4-6 detailed paragraphs or use <h3> sub-sections with supporting evidence.
 - DEEP-DIVE EXPERT ANALYSIS: Under at least 2 of your <h2> sections, you MUST include an 'Expert Take' or 'By The Numbers' angle — a paragraph that synthesizes specific statistics, historical context, or a unique expert perspective that the average reader cannot find on a basic news site. This is your content's competitive moat.
 - KEY TAKEAWAYS BOX: At the very top of the content (before the first paragraph), inject a styled HTML 'Key Takeaways' box using this exact template: <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); border-left: 4px solid #e94560; padding: 20px 25px; margin-bottom: 30px; border-radius: 4px;"><h3 style="color: #e94560; margin-top: 0; font-size: 1em; text-transform: uppercase; letter-spacing: 1px;">⚡ Key Takeaways</h3><ul style="color: #eaeaea; margin: 0; padding-left: 20px; line-height: 1.8;">BULLET_POINTS_HERE</ul></div>. Generate 3-5 bullet points summarizing the most shocking/important facts of the article. This increases dwell time and reduces bounce rate.
-- FAQ SECTION (Schema-Ready): You MUST include a dedicated FAQ section as the SECOND TO LAST section (before the final conclusion H2). Use this exact structure: <h2>Frequently Asked Questions</h2> followed by 3-4 question-answer pairs, each using <h3> for the question and a <p> for the answer. These FAQs MUST directly answer the exact search queries a user would type into Google about this topic. This boosts Google AI Overview and FAQ rich snippet eligibility.
+${netWorthFormattingBlock}
+${faqBlock}
 - Keyword Density Enforcer: Maintain a natural keyword density of strictly 1% to 1.5%.
 - SEO Linking & Formatting Rules: Embed exactly 1 to 2 EXTERNAL links to high-authority sites (like Wikipedia, Reuters, ESPN, IMDb) in the content using proper <a> tags to back up factual claims. The generated HTML must contain exactly one internal link to https://brightcelebrity.com/. Bold the focus keyword at least twice.
 - HEADING STRUCTURE (CRITICAL): NEVER use an <h1> tag. Main sections MUST be <h2>. Sub-sections MUST be <h3>. NEVER skip heading levels (e.g., jumping from H2 to H4). All headings MUST be concise and punchy (3 to 6 words). Naturally include the exact focus keyword in exactly 1 or 2 of the <h2> headings.
@@ -232,12 +278,15 @@ STRICT INSTRUCTIONS:
 - PREMIUM TABLE STYLING: Whenever you generate an HTML table, inject premium inline CSS: <table style="width: 100%; border-collapse: collapse; margin: 25px 0; font-size: 1em; font-family: sans-serif; box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);">. The table header: <thead style="background-color: #2c3e50; color: #ffffff; text-align: left;">. Cells: style="padding: 12px 15px; border-bottom: 1px solid #dddddd;".
 - STRICT ARTICLE TEMPLATE: To maintain a consistent 95+ SEO score, you MUST follow this exact HTML structure:
   [KEY TAKEAWAYS BOX] -> Place the styled Key Takeaways <div> here, before the first paragraph.
+  ${isNetWorth ? '[QUICK NET WORTH SNAPSHOT BOX] -> Place the styled snapshot <div> here, right after Key Takeaways.' : ''}
   Introduction: 2-3 short paragraphs containing the exact focus keyword in the first sentence.
   H2: [Catchy Section Title with Focus Keyword] -> Followed by detailed paragraphs with deep analysis.
   H3: [Sub-topic] -> Followed by bullet points or expert insights.
   H2: [Data/Stats Section Title] -> Followed by the newly styled premium HTML table.
-  H2: [Background & Context] -> Deep-dive history, expert take, or 'By The Numbers' section.
-  H2: Frequently Asked Questions -> 3-4 H3 questions with <p> answers (schema-ready).
+  ${isNetWorth ? 'H2: [Income Sources & Earnings Breakdown] -> Premium HTML table with all income streams.
+  H2: [Car Collection & Real Estate] -> Structured bullet points for assets.
+  H2: [Brand Endorsements & Business Ventures] -> Bullet points with deal values.' : 'H2: [Background & Context] -> Deep-dive history, expert take, or \'By The Numbers\' section.'}
+  H2: People Also Ask -> 4-5 Schema.org structured Q&A pairs (FAQPage schema-ready).
   H2: [Final Thoughts / Conclusion] -> Summarize and naturally include the focus keyword one last time.
 - Meaningful Lists: Use bullet points (<ul>) or numbered lists (<ol>) ONLY when breaking down complex ideas, itemizing facts, or listing achievements. Do not use them just for the sake of having a list.
 - Smart Image Placement & MULTI-IMAGE ALT TAGS: You must dynamically and organically insert exactly TWO image placeholders: [INJECT_IMAGE_2_HERE] and [INJECT_IMAGE_3_HERE] evenly throughout the HTML content. Place the first one after the first or second <h2> tag, and the second one further down the article. Do NOT use generic <img> tags, ONLY use the exact string placeholders.
@@ -300,11 +349,11 @@ CRITICAL OUTPUT REQUIREMENT: You MUST return ONLY valid JSON formatted strictly 
 }
 
 /**
- * Fetches top trending US Sports and Entertainment news from NewsData.io API using axios.
- * Filters to keep only articles where image_url is NOT null, extracting top 3 Sports and top 2 Entertainment.
- * @returns {Promise<Array<{title: string, link: string, snippet: string, image_url: string, category: string}>>}
+ * Fetches raw trending US Sports and Entertainment news from NewsData.io API.
+ * Returns unsliced filtered arrays for downstream curation.
+ * @returns {Promise<{sportsFiltered: Array, entFiltered: Array}>}
  */
-async function getCombinedEntertainmentAndSportsTrends() {
+async function fetchRawUSNewsTrends() {
   console.log(`[Info] Fetching US Sports and Entertainment news from NewsData.io API...`);
   
   try {
@@ -324,36 +373,126 @@ async function getCombinedEntertainmentAndSportsTrends() {
     const sportsResults = sportsResp.data?.results || [];
     const entResults = entResp.data?.results || [];
 
-    // Filter the results array to keep only articles with valid editorial image_urls
     const sportsFiltered = sportsResults.filter(item => item && isValidEditorialImage(item.image_url));
     const entFiltered = entResults.filter(item => item && isValidEditorialImage(item.image_url));
 
-    // Extract top 5 articles for Sports and top 5 for Entertainment
-    const sportsTopics = sportsFiltered.slice(0, 5).map(item => ({
-      title: item.title || 'Unknown Sports Topic',
-      link: item.link || '',
-      snippet: item.description || item.content || item.title,
-      image_url: item.image_url,
-      category: 'sports'
-    }));
-
-    const entTopics = entFiltered.slice(0, 5).map(item => ({
-      title: item.title || 'Unknown Entertainment Topic',
-      link: item.link || '',
-      snippet: item.description || item.content || item.title,
-      image_url: item.image_url,
-      category: 'entertainment'
-    }));
-
-    const combined = [...sportsTopics, ...entTopics];
-    console.log(`[Info] Successfully retrieved ${combined.length} valid topics (${sportsTopics.length} Sports, ${entTopics.length} Entertainment).`);
-    return combined;
+    console.log(`[Info] Raw fetch: ${sportsFiltered.length} valid Sports, ${entFiltered.length} valid Entertainment articles.`);
+    return { sportsFiltered, entFiltered };
   } catch (error) {
     const errMsg = error.response?.data?.results?.message || error.response?.data?.message || error.message;
     console.error(`[Error] Failed to fetch NewsData.io API: ${errMsg}`);
     process.exit(1);
-    return [];
+    return { sportsFiltered: [], entFiltered: [] };
   }
+}
+
+/**
+ * Uses Gemini to identify the single most trending US person from a list of news headlines.
+ * @param {Array} newsItems - Array of news article objects with 'title' and 'snippet' fields
+ * @param {string} domain - Either 'sports' or 'entertainment'
+ * @returns {Promise<string>} The full name of the top trending person
+ */
+async function identifyTopTrendingPerson(newsItems, domain) {
+  const headlines = newsItems.map(item => `- ${item.title}`).join('\n');
+  const prompt = `You are an expert US ${domain} analyst. Analyze these trending US ${domain} headlines and identify the SINGLE most talked-about, trending American ${domain === 'sports' ? 'athlete/sports personality' : 'celebrity/entertainer'} right now.
+
+Headlines:
+${headlines}
+
+Rules:
+- Pick ONLY ONE person who is generating the MOST buzz across these headlines.
+- The person MUST be a well-known US-based figure.
+- If no clear person emerges, pick the most famous ${domain === 'sports' ? 'US athlete (e.g., LeBron James, Patrick Mahomes, Travis Kelce)' : 'US celebrity (e.g., Taylor Swift, Zendaya, MrBeast, Beyoncé)'}.
+- Return ONLY the person's full name as a plain string. No quotes, no explanation, no JSON.
+
+Example output: LeBron James`;
+
+  try {
+    const result = await geminiModel.generateContent(prompt);
+    const personName = result.response.text().trim().replace(/["']/g, '');
+    console.log(`[Curate] Top trending ${domain} person identified: ${personName}`);
+    return personName;
+  } catch (err) {
+    const fallback = domain === 'sports' ? 'LeBron James' : 'Taylor Swift';
+    console.warn(`[Curate] Failed to identify trending ${domain} person (${err.message}). Falling back to: ${fallback}`);
+    return fallback;
+  }
+}
+
+/**
+ * Curates a strict batch of 10 topics following the 4+1+4+1 content mix strategy:
+ *   4 Trending US Sports News
+ *   1 Sports Person Net Worth/Lifestyle
+ *   4 Trending US Entertainment News
+ *   1 Celebrity Net Worth/Lifestyle
+ * @returns {Promise<Array<{title: string, link: string, snippet: string, image_url: string, category: string, topicType: string}>>}
+ */
+async function curateTenTopicBatch() {
+  console.log('[Curate] Starting 4+1+4+1 US content mix curation...');
+
+  const { sportsFiltered, entFiltered } = await fetchRawUSNewsTrends();
+
+  // ── Extract 4 Sports News topics ──
+  const sportsNews = sportsFiltered.slice(0, 4).map(item => ({
+    title: item.title || 'Unknown Sports Topic',
+    link: item.link || '',
+    snippet: item.description || item.content || item.title,
+    image_url: item.image_url,
+    category: 'sports',
+    topicType: 'news'
+  }));
+
+  // ── Extract 4 Entertainment News topics ──
+  const entNews = entFiltered.slice(0, 4).map(item => ({
+    title: item.title || 'Unknown Entertainment Topic',
+    link: item.link || '',
+    snippet: item.description || item.content || item.title,
+    image_url: item.image_url,
+    category: 'entertainment',
+    topicType: 'news'
+  }));
+
+  // ── Identify top trending persons via Gemini (parallel) ──
+  const [sportsPersonName, entPersonName] = await Promise.all([
+    identifyTopTrendingPerson(sportsFiltered.slice(0, 10), 'sports'),
+    identifyTopTrendingPerson(entFiltered.slice(0, 10), 'entertainment')
+  ]);
+
+  // ── Create 1 Sports Net Worth topic ──
+  const sportsNetWorth = {
+    title: `${sportsPersonName} Net Worth 2026: Complete Salary, Endorsements & Lifestyle Breakdown`,
+    link: '',
+    snippet: `Comprehensive net worth breakdown of ${sportsPersonName} including salary, endorsement deals, car collection, real estate portfolio, business ventures, and complete lifestyle analysis for 2026.`,
+    image_url: sportsFiltered[0]?.image_url || '',
+    category: 'sports',
+    topicType: 'net_worth'
+  };
+
+  // ── Create 1 Entertainment Net Worth topic ──
+  const entNetWorth = {
+    title: `${entPersonName} Net Worth 2026: Complete Earnings, Assets & Lifestyle Breakdown`,
+    link: '',
+    snippet: `Comprehensive net worth breakdown of ${entPersonName} including earnings, brand deals, car collection, real estate portfolio, business empire, and complete lifestyle analysis for 2026.`,
+    image_url: entFiltered[0]?.image_url || '',
+    category: 'entertainment',
+    topicType: 'net_worth'
+  };
+
+  // ── Assemble the final 10-topic batch (4+1+4+1) ──
+  const batch = [
+    ...sportsNews,
+    sportsNetWorth,
+    ...entNews,
+    entNetWorth
+  ];
+
+  console.log(`[Curate] ✅ Curated ${batch.length} topics:`);
+  console.log(`  → ${sportsNews.length} Sports News`);
+  console.log(`  → 1 Sports Net Worth: "${sportsPersonName}"`);
+  console.log(`  → ${entNews.length} Entertainment News`);
+  console.log(`  → 1 Entertainment Net Worth: "${entPersonName}"`);
+
+  return batch;
 }
 
 /**
@@ -547,24 +686,34 @@ function validateArticle(article, index) {
  * @returns {Promise<Object|null>} The structured result or null on failure
  */
 async function generateArticleFromTopic(item, index) {
-  console.log(`[Topic Process ${index}] Processing: "${item.title}"`);
+  console.log(`[Topic Process ${index}] Processing: "${item.title}" (type: ${item.topicType || 'news'})`);
   
   try {
-    if (!item.link) {
+    // Net worth topics may not have a source link — use snippet as seed content
+    if (!item.link && item.topicType !== 'net_worth') {
       console.log(`  ↳ [Topic ${index}] Skipped: No valid source URL.`);
       return null;
     }
 
-    console.log(`  ↳ [Topic ${index}] Scraping source URL via Cheerio...`);
-    const scraped = await scrapeArticleText(item.link);
-    console.log(`  ↳ [Topic ${index}] Scraped ${scraped.wordCount} words (${scraped.status}).`);
+    let rawText = item.snippet || item.title;
+    let scraped = { wordCount: 0, text: '', status: 'No source URL', image1: '', bodyImages: [] };
 
-    const rawText = (scraped.wordCount > 0 && scraped.text) ? scraped.text : (item.snippet || item.title);
-    const combinedText = `--- ARTICLE: ${item.title} (${item.link}) ---\n${rawText}`;
+    if (item.link) {
+      console.log(`  ↳ [Topic ${index}] Scraping source URL via Cheerio...`);
+      scraped = await scrapeArticleText(item.link);
+      console.log(`  ↳ [Topic ${index}] Scraped ${scraped.wordCount} words (${scraped.status}).`);
+      if (scraped.wordCount > 0 && scraped.text) {
+        rawText = scraped.text;
+      }
+    } else {
+      console.log(`  ↳ [Topic ${index}] Net Worth topic — using AI knowledge + snippet as seed.`);
+    }
+
+    const combinedText = `--- ARTICLE: ${item.title} (${item.link || 'AI-generated topic'}) ---\n${rawText}`;
     
     console.log(`  ↳ [Topic ${index}] Generating SEO article via Gemini AI...`);
     console.log("Step 3: Generating Article with Gemini AI...");
-    const generatedOutput = await generateArticles(item.title, combinedText);
+    const generatedOutput = await generateArticles(item.title, combinedText, item.topicType || 'news');
 
     // Parse Gemini JSON output
     let parsedGemini = {};
@@ -636,26 +785,26 @@ async function fetchAndScrapeTrends() {
     console.log("Step 1: Preloading WordPress Taxonomies...");
     await preloadWordPressTaxonomies();
 
-    console.log("Step 2: Fetching Trends from NewsData API...");
-    const combinedTopics = await getCombinedEntertainmentAndSportsTrends();
+    console.log("Step 2: Curating 4+1+4+1 US Content Mix...");
+    const curatedBatch = await curateTenTopicBatch();
     
-    // Deduplicate topics to prevent keyword cannibalization
-    const dedupedTopics = deduplicateTopics(combinedTopics);
+    // Deduplicate news topics (net worth topics are always unique by design)
+    const newsTopics = curatedBatch.filter(t => t.topicType === 'news');
+    const netWorthTopics = curatedBatch.filter(t => t.topicType === 'net_worth');
+    const dedupedNews = deduplicateTopics(newsTopics);
     
-    // Shuffle the topics to ensure variety and prevent duplicate hourly posts
-    const shuffledTopics = dedupedTopics.sort(() => 0.5 - Math.random());
-    // Select top 3 topics — quality over quantity: fewer articles, higher depth
-    const topTopics = shuffledTopics.slice(0, 3);
+    // Reassemble: deduped news + net worth topics (always kept)
+    const topTopics = [...dedupedNews, ...netWorthTopics];
 
     if (topTopics.length === 0) {
       console.log('[Info] No trending topics found. Exiting.');
       return;
     }
 
-    console.log(`\n[Info] Starting ultra-fast parallel generation pipeline for ${topTopics.length} topics...\n`);
+    console.log(`\n[Info] Starting ultra-fast parallel generation pipeline for ${topTopics.length} topics (4+1+4+1 mix)...\n`);
     const publishQueue = [];  // Articles that passed validation
     const retryQueue = [];    // { item, index } objects that failed validation
-    const BATCH_SIZE = 3; // All 3 articles generated in one parallel batch — no inter-batch delay needed
+    const BATCH_SIZE = 5; // Process 5 at a time (half the batch) to balance speed vs API limits
 
     // ══════════════════════════════════════════════════════════════
     // PHASE 1: Generate all articles and sort into publish/retry queues

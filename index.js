@@ -255,19 +255,22 @@ ${scrapedText}
 Write a high-quality, deeply detailed ${isNetWorth ? 'Net Worth & Lifestyle breakdown' : 'news'} article based on the provided text.
 
 STRICT INSTRUCTIONS:
-- Keyword Generation First: Generate a strict 1-2 word focus_keyword.
-- Forced Exact String Match (Zero Tolerance): You MUST use this EXACT 1-2 word string, character-for-character, in:
-  1. title: MUST contain a Number (e.g., 5, 7) and a Power Word (e.g., Shocking, Massive, Ultimate). The title MUST strictly start with the exact focus_keyword, followed by a colon (:). Example Format: '[Focus Keyword]: 7 [Power Word] Secrets Behind This [Sentiment Word] Event'.
-  2. seo_description: The very first words of this description MUST be the exact focus_keyword. The description MUST be strictly between 120 and 160 characters long.
-  3. slug: The URL slug MUST contain the exact focus_keyword (lowercase, hyphenated).
-  4. content: Ensure the exact focus_keyword appears naturally in the very first sentence of the HTML content (First 10% rule).
+- BACKLINKO PRIMARY KEYWORD IDENTIFICATION (Step 1 — Do This FIRST): Analyze the topic and extract a clear 2-4 word primary target keyword that real US users would type into Google. This is your focus_keyword. Examples: 'LeBron James Net Worth', 'Taylor Swift Boyfriend', 'NFL Draft 2026', 'Patrick Mahomes Contract'. The keyword MUST be specific enough to target a real search query, NOT generic.
+- FRONT-LOADED KEYWORD PLACEMENT (Backlinko Rule #3): You MUST place the EXACT primary focus_keyword within the FIRST 50-100 words of the opening section. Google puts more weight on terms that appear at the top of your page. This is non-negotiable.
+- Forced Exact String Match (Zero Tolerance): You MUST use this EXACT focus_keyword string, character-for-character, in:
+  1. title: MUST contain a Number (e.g., 5, 7) and a Power Word (e.g., Shocking, Massive, Ultimate). The title MUST strictly start with the exact focus_keyword, followed by a colon (:). Example Format: '[Focus Keyword]: 7 [Power Word] Secrets Behind This [Sentiment Word] Event'. The title tag is the MOST important place for your keyword (Backlinko Rule #4).
+  2. seo_description: The very first words of this description MUST be the exact focus_keyword. The description MUST be strictly between 120 and 160 characters long. Write it to MAXIMIZE click-through rate (CTR) — use curiosity, numbers, or emotional triggers. This is your ad copy in the SERPs (Backlinko Rule #10 & #15).
+  3. slug: The URL slug MUST be the exact focus_keyword (lowercase, hyphenated). Keep it SHORT and keyword-focused. Example: 'lebron-james-net-worth' NOT 'lebron-james-net-worth-2026-complete-salary-breakdown'. (Backlinko Rule #2).
+  4. content: Ensure the exact focus_keyword appears naturally in the very FIRST SENTENCE of the HTML content (First 50-100 words rule).
+- HEADING KEYWORD HIERARCHY (Backlinko Rule #5): The primary focus_keyword or its direct synonym MUST appear in AT LEAST ONE <h2> heading. Additionally, use the focus_keyword or a close variation in the page's conceptual H1 (the title). H tags reinforce topic relevance to Google.
+- LSI & SEMANTIC KEYWORD WEAVING (Backlinko Rule #9): You MUST identify and naturally weave 3-5 LSI (Latent Semantic Indexing) keywords and semantic variations of the focus_keyword throughout the article paragraphs. For example, if focus_keyword is 'LeBron James Net Worth', LSI keywords could be: 'LeBron earnings', 'LeBron salary breakdown', 'James financial empire', 'LeBron endorsement deals', 'Lakers star wealth'. Return these as a JSON array named lsi_keywords. Do NOT stuff them — they must read naturally.
 - Content Expansion Blueprint (STRICT 2000+ WORDS MINIMUM): CRITICAL SEO RULE: You MUST write a comprehensive, deeply researched, magazine-quality article that is STRICTLY OVER 2000 words long. This is non-negotiable. To hit this target, you MUST: (a) Include background context and history. (b) Add unique angles, insider facts, and data that competitors are NOT covering. (c) Explore multiple perspectives on the story. You MUST structure the HTML with exactly 5 to 6 distinct <h2> headings. Under EACH <h2> heading, you MUST write at least 4-6 detailed paragraphs or use <h3> sub-sections with supporting evidence.
 - DEEP-DIVE EXPERT ANALYSIS: Under at least 2 of your <h2> sections, you MUST include an 'Expert Take' or 'By The Numbers' angle — a paragraph that synthesizes specific statistics, historical context, or a unique expert perspective that the average reader cannot find on a basic news site. This is your content's competitive moat.
 - KEY TAKEAWAYS BOX: At the very top of the content (before the first paragraph), inject a styled HTML 'Key Takeaways' box using this exact template: <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); border-left: 4px solid #e94560; padding: 20px 25px; margin-bottom: 30px; border-radius: 4px;"><h3 style="color: #e94560; margin-top: 0; font-size: 1em; text-transform: uppercase; letter-spacing: 1px;">⚡ Key Takeaways</h3><ul style="color: #eaeaea; margin: 0; padding-left: 20px; line-height: 1.8;">BULLET_POINTS_HERE</ul></div>. Generate 3-5 bullet points summarizing the most shocking/important facts of the article. This increases dwell time and reduces bounce rate.
 ${netWorthFormattingBlock}
 ${faqBlock}
 - Keyword Density Enforcer: Maintain a natural keyword density of strictly 1% to 1.5%.
-- SEO Linking & Formatting Rules: Embed exactly 1 to 2 EXTERNAL links to high-authority sites (like Wikipedia, Reuters, ESPN, IMDb) in the content using proper <a> tags to back up factual claims. The generated HTML must contain exactly one internal link to https://brightcelebrity.com/. Bold the focus keyword at least twice.
+- EXTERNAL AUTHORITY LINKS (Backlinko Rule #8 — UPGRADED): Embed exactly 2 to 3 CONTEXTUAL external links to high-authority, reputable sites using DESCRIPTIVE anchor text (NOT 'click here' or bare URLs). Link to sources like ESPN, Forbes, Wikipedia, official league sites, IMDb, or verified celebrity profiles. Each external link MUST use anchor text that describes the destination (e.g., <a href="https://www.espn.com/nfl/story/...">ESPN's analysis of the NFL trade deadline</a>). This helps Google understand your page's topic (Backlinko Rule #8). The generated HTML must also contain at least 3 internal links to https://brightcelebrity.com/ with varied, keyword-rich anchor text (Backlinko Rule #7). Bold the focus keyword at least twice.
 - HEADING STRUCTURE (CRITICAL): NEVER use an <h1> tag. Main sections MUST be <h2>. Sub-sections MUST be <h3>. NEVER skip heading levels (e.g., jumping from H2 to H4). All headings MUST be concise and punchy (3 to 6 words). Naturally include the exact focus keyword in exactly 1 or 2 of the <h2> headings.
 - AI CITATION READINESS (GEO): Use 'Answer-first' formatting. Place the direct answer to the core topic/question in the first 100 words. You MUST include at least one Markdown table (styled as HTML) or bulleted list for comparative data or statistics to ensure the content is highly extractable by AI search engines.
 - READABILITY CONSTRAINTS: Keep paragraphs strictly to 2-4 sentences max. Aim for an average of 15-20 words per sentence to ensure a Flesch Reading Ease score suitable for a general audience.
@@ -290,11 +293,12 @@ ${faqBlock}
   H2: [Final Thoughts / Conclusion] -> Summarize and naturally include the focus keyword one last time.
 - Meaningful Lists: Use bullet points (<ul>) or numbered lists (<ol>) ONLY when breaking down complex ideas, itemizing facts, or listing achievements. Do not use them just for the sake of having a list.
 - Smart Image Placement & MULTI-IMAGE ALT TAGS: You must dynamically and organically insert exactly TWO image placeholders: [INJECT_IMAGE_2_HERE] and [INJECT_IMAGE_3_HERE] evenly throughout the HTML content. Place the first one after the first or second <h2> tag, and the second one further down the article. Do NOT use generic <img> tags, ONLY use the exact string placeholders.
-- Alt Tags generation: You must generate a JSON array named body_image_alt_tags containing exactly 2 strings. These strings must be highly descriptive, long-tail variations of the focus keyword to be used as alt text for the images.
+- KEYWORD-RICH IMAGE ALT TEXT (Backlinko Rule #6): You must generate a JSON array named body_image_alt_tags containing exactly 2 strings. Each alt tag MUST be a highly descriptive, keyword-rich phrase that includes the primary focus_keyword and describes what the image likely shows. Example: 'LeBron James celebrating after scoring 40 points in Lakers game 2026' NOT 'image1'. Google uses image alt text to understand page content.
+- Also generate a JSON string named featured_image_alt — a descriptive alt text for the featured/thumbnail image containing the focus_keyword. Example: 'Patrick Mahomes throwing a touchdown pass during 2026 NFL season'.
 - Courtesy (Tone): Maintain a highly helpful, engaging, and welcoming tone.
 - Tags: Generate a JSON array named tags containing exactly 15 to 20 highly specific, long-tail SEO tags relevant to the article. Mix entity names, trending search queries (like 'Net Worth 2026'), associated people, and specific events. Do NOT use generic one-word tags. Integrate these naturally into the body text.
 - Category: Analyze the article and return TWO category fields: parent_category (string, e.g., 'Sports', 'Entertainment') and sub_categories (An ARRAY of strings). You MUST dynamically decide how many sub-categories are relevant.
-- Slug: Generate a slug (URL-friendly string, lowercase, hyphen-separated) that MUST contain the exact focus_keyword.
+- Slug: Generate a slug that is the focus_keyword converted to lowercase, hyphen-separated. Keep it SHORT — just the keyword. Example: 'lebron-james-net-worth'. Do NOT add extra words beyond the keyword.
 - Thumbnail Text: Generate a short, highly engaging text specifically for an image overlay. It MUST be extremely short: Maximum 3 to 5 words. It MUST be highly engaging, clickbaity, and use a power word (e.g., 'Shocking Truth Revealed!', 'Must See Details!', 'Hidden Secrets!'). It should summarize the core emotion or shock-value of the article.
 
 CRITICAL OUTPUT REQUIREMENT: You MUST return ONLY valid JSON formatted strictly as follows, without any markdown backticks, explanations, or extra text. NEVER use literal \n or \r characters in the content string. Use proper HTML tags like <p> and <br> for spacing:
@@ -303,12 +307,14 @@ CRITICAL OUTPUT REQUIREMENT: You MUST return ONLY valid JSON formatted strictly 
   "content": "Full HTML article body text following the formatting rules...",
   "parent_category": "Broad Category (e.g., Sports, Entertainment)",
   "sub_categories": ["Sub-category 1", "Sub-category 2"],
-  "focus_keyword": "single-strong-keyword",
-  "slug": "url-friendly-slug-with-keyword",
+  "focus_keyword": "2-4 word primary target keyword",
+  "lsi_keywords": ["semantic variation 1", "LSI keyword 2", "related phrase 3", "synonym 4", "contextual term 5"],
+  "slug": "short-keyword-slug",
   "tags": ["Highly Specific Tag 1", "Person Net Worth 2026", "Associated Event 2026", "Trending Search Query 4"],
-  "seo_description": "A compelling meta description",
+  "seo_description": "A compelling 120-160 char meta description engineered for maximum CTR",
   "thumbnail_text": "Shocking Truth Revealed!",
-  "body_image_alt_tags": ["long-tail-alt-1", "long-tail-alt-2"]
+  "body_image_alt_tags": ["descriptive keyword-rich alt text for image 1", "descriptive keyword-rich alt text for image 2"],
+  "featured_image_alt": "descriptive keyword-rich alt text for the featured thumbnail image"
 }`;
 
   try {
@@ -753,10 +759,12 @@ async function generateArticleFromTopic(item, index) {
       image1: getHighResImageUrl(item.image_url || ''),
       bodyImages: (scraped.wordCount > 0 && Array.isArray(scraped.bodyImages) && scraped.bodyImages.length > 0) ? scraped.bodyImages : [getHighResImageUrl(item.image_url)],
       bodyImageAltTags: Array.isArray(parsedGemini?.body_image_alt_tags) ? parsedGemini.body_image_alt_tags : [],
+      featuredImageAlt: parsedGemini?.featured_image_alt || `${parsedGemini?.focus_keyword || item.title} - latest news and updates`,
       parent_category: parentCategory,
       sub_categories: subCategories,
       topicType: item.category || 'sports',
       focus_keyword: parsedGemini?.focus_keyword || item.title,
+      lsi_keywords: Array.isArray(parsedGemini?.lsi_keywords) ? parsedGemini.lsi_keywords : [],
       slug: parsedGemini?.slug || '',
       tags: Array.isArray(parsedGemini?.tags) ? parsedGemini.tags : [item.title],
       seo_description: parsedGemini?.seo_description || '',
@@ -1127,11 +1135,11 @@ async function uploadImageToWordPress(imageUrl, title, altText, thumbnailText) {
     // 2. Upload to WP using FormData
     const credentials = `${process.env.WP_USERNAME}:${process.env.WP_APP_PASSWORD}`;
     const token = Buffer.from(credentials).toString('base64');
-    const safeTitle = (title || 'image').replace(/[^a-z0-9]/gi, '_').toLowerCase();
     const wpEndpoint = `${process.env.WP_URL.replace(/\/$/, '')}/wp-json/wp/v2/media`;
 
     const form = new FormData();
-    const keywordSlug = (altText || title || 'image').replace(/[^a-z0-9]/gi, '-').replace(/(^-|-$)+/g, '').toLowerCase();
+    // Backlinko Rule #6: Use keyword-rich image filenames
+    const keywordSlug = (altText || title || 'image').replace(/[^a-z0-9]/gi, '-').replace(/(^-|-$)+/g, '').replace(/-{2,}/g, '-').toLowerCase();
     const filename = `${keywordSlug}-${Date.now()}.jpg`;
     form.append('file', buffer, { filename: filename, contentType: 'image/jpeg' });
     
@@ -1210,10 +1218,11 @@ async function publishToWordPress(article) {
     // Get or create tag integer IDs
     const tagIds = await resolveTags(article.tags);
 
-    // Upload image to WordPress Media Library
+    // Upload image to WordPress Media Library (Backlinko Rule #6: keyword-rich alt text)
     let mediaId = null;
     if (article.image1) {
-      mediaId = await uploadImageToWordPress(article.image1, article.title, article.focus_keyword, article.thumbnail_text);
+      const featuredAlt = article.featuredImageAlt || `${article.focus_keyword} - latest news and updates`;
+      mediaId = await uploadImageToWordPress(article.image1, article.title, featuredAlt, article.thumbnail_text);
     }
 
     // Convert plain text newlines to HTML paragraphs for clean WordPress rendering
@@ -1248,24 +1257,35 @@ async function publishToWordPress(article) {
     const postContent = formattedBody;
     const wpEndpoint = `${process.env.WP_URL.replace(/\/$/, '')}/wp-json/wp/v2/posts`;
 
-    // Create a clean slug from the full article title to ensure permalink matches title
-    let slugSource = article.title || article.focus_keyword || 'article';
-    let seoSlug = slugSource.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-    if (seoSlug.length > 74) {
-      seoSlug = seoSlug.substring(0, 74).replace(/-+$/, '');
+    // Backlinko Rule #2: Derive slug from focus_keyword for clean, keyword-targeted URLs
+    // e.g., 'LeBron James Net Worth' -> 'lebron-james-net-worth'
+    const keywordForSlug = article.focus_keyword || article.title || 'article';
+    let seoSlug = keywordForSlug.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+    // If Gemini already returned a clean short slug, prefer it
+    if (article.slug && article.slug.length > 3 && article.slug.length < 60) {
+      seoSlug = article.slug.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/(^-|-$)+/g, '');
+    }
+    if (seoSlug.length > 60) {
+      seoSlug = seoSlug.substring(0, 60).replace(/-+$/, '');
+    }
+
+    // Backlinko Rule #10: Ensure meta description is <=160 chars and CTR-optimized
+    let metaExcerpt = (article.seo_description || '').trim();
+    if (metaExcerpt.length > 160) {
+      metaExcerpt = metaExcerpt.substring(0, 157).replace(/\s+\S*$/, '') + '...';
     }
 
     const payload = {
       title: article.title || 'Untitled Article',
       content: postContent,
-      excerpt: article.seo_description || '',
+      excerpt: metaExcerpt,
       status: 'publish',
       categories: categoryIds,
       tags: tagIds,
       slug: seoSlug,
       meta: {
         rank_math_focus_keyword: article.focus_keyword || '',
-        rank_math_description: article.seo_description || '',
+        rank_math_description: metaExcerpt,
         rank_math_title: article.title || '',
         rank_math_content_ai_score: '100'
       }

@@ -5,6 +5,7 @@ const cheerio = require('cheerio');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { createCanvas, loadImage } = require('canvas');
 const FormData = require('form-data');
+const DDG = require('duck-duck-scrape');
 
 // Initialize Gemini client and model
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
@@ -132,6 +133,73 @@ function isValidEditorialImage(url) {
   }
 
   return true;
+}
+
+/**
+ * Fetches real editorial photographs of a specific person using DuckDuckGo Image Search.
+ * Falls back to Wikimedia Commons REST API if DDG returns no results.
+ * All returned URLs pass through the 4-Layer Image Validation filter.
+ * @param {string} subjectName - The full name of the person (e.g., 'Taylor Swift')
+ * @param {number} count - Number of images to return (default 4)
+ * @returns {Promise<string[]>} Array of validated high-resolution image URLs
+ */
+async function fetchRealSubjectImages(subjectName, count = 4) {
+  if (!subjectName || typeof subjectName !== 'string' || subjectName.trim().length < 2) {
+    return [];
+  }
+
+  const validImages = [];
+  const seenUrls = new Set();
+
+  // ── Layer 1: DuckDuckGo Image Search ──
+  try {
+    console.log(`  ↳ [Image Sourcer] Searching DuckDuckGo for real photos of "${subjectName}"...`);
+    const ddgResults = await DDG.image(`${subjectName} high quality editorial photo`, {
+      safeSearch: DDG.SafeSearchType.STRICT
+    });
+
+    const results = ddgResults?.results || [];
+    for (const img of results) {
+      if (validImages.length >= count) break;
+      const imgUrl = img.image || img.thumbnail;
+      if (!imgUrl || seenUrls.has(imgUrl)) continue;
+      seenUrls.add(imgUrl);
+
+      if (isValidEditorialImage(imgUrl)) {
+        validImages.push(getHighResImageUrl(imgUrl));
+      }
+    }
+    console.log(`  ↳ [Image Sourcer] DuckDuckGo returned ${validImages.length} valid editorial image(s).`);
+  } catch (ddgErr) {
+    console.warn(`  ↳ [Image Sourcer Warning] DuckDuckGo search failed: ${ddgErr.message}`);
+  }
+
+  // ── Layer 2: Wikimedia Commons REST API Fallback ──
+  if (validImages.length < count) {
+    try {
+      console.log(`  ↳ [Image Sourcer] Falling back to Wikimedia Commons for "${subjectName}"...`);
+      const wikiResp = await axios.get(
+        `https://commons.wikimedia.org/w/api.php?action=query&generator=images&titles=${encodeURIComponent(subjectName)}&prop=imageinfo&iiprop=url|size&iiurlwidth=1200&gimlimit=20&format=json`,
+        { timeout: 10000, headers: { 'User-Agent': 'CraftZoneBot/1.0 (news automation)' } }
+      );
+      const pages = wikiResp.data?.query?.pages || {};
+      for (const page of Object.values(pages)) {
+        if (validImages.length >= count) break;
+        const info = page.imageinfo?.[0];
+        if (info?.url && isValidEditorialImage(info.url)) {
+          if (!seenUrls.has(info.url)) {
+            seenUrls.add(info.url);
+            validImages.push(info.url);
+          }
+        }
+      }
+      console.log(`  ↳ [Image Sourcer] Wikimedia added ${validImages.length} total valid image(s).`);
+    } catch (wikiErr) {
+      console.warn(`  ↳ [Image Sourcer Warning] Wikimedia fallback failed: ${wikiErr.message}`);
+    }
+  }
+
+  return validImages;
 }
 
 /**
@@ -325,7 +393,8 @@ CRITICAL OUTPUT REQUIREMENT: You MUST return ONLY valid JSON formatted strictly 
   "seo_description": "A compelling 120-160 char meta description engineered for maximum CTR",
   "thumbnail_text": "Shocking Truth Revealed!",
   "body_image_alt_tags": ["descriptive keyword-rich alt text for image 1", "descriptive keyword-rich alt text for image 2"],
-  "featured_image_alt": "descriptive keyword-rich alt text for the featured thumbnail image"
+  "featured_image_alt": "descriptive keyword-rich alt text for the featured thumbnail image",
+  "primary_subject_name": "Full Name of the main person in the article, or null if not about a specific person"
 }`;
 
   try {
@@ -761,13 +830,34 @@ async function generateArticleFromTopic(item, index) {
     const parentCategory = parsedGemini?.parent_category || item.category || 'General';
     const subCategories = Array.isArray(parsedGemini?.sub_categories) ? parsedGemini.sub_categories : ['News'];
 
-    // Structure into the final result object using NewsData.io original image_url
+    // ── Entity-Based Image Sourcing ──
+    // If Gemini identified a primary subject (person), fetch REAL photos from DuckDuckGo
+    const primarySubject = parsedGemini?.primary_subject_name || null;
+    let realImages = [];
+
+    if (primarySubject && typeof primarySubject === 'string' && primarySubject.toLowerCase() !== 'null') {
+      console.log(`  ↳ [Topic ${index}] Entity detected: "${primarySubject}". Fetching real subject images...`);
+      realImages = await fetchRealSubjectImages(primarySubject, 4);
+    }
+
+    // Determine final image sources: prefer real entity images over generic NewsData images
+    const finalFeaturedImage = realImages.length > 0
+      ? realImages[0]
+      : getHighResImageUrl(item.image_url || '');
+
+    const finalBodyImages = realImages.length >= 3
+      ? realImages.slice(1, 3)
+      : (scraped.wordCount > 0 && Array.isArray(scraped.bodyImages) && scraped.bodyImages.length > 0)
+        ? scraped.bodyImages
+        : [getHighResImageUrl(item.image_url)];
+
+    // Structure into the final result object
     const topicResult = {
       topic: item.title,
       title: parsedGemini?.title || `${item.title}`,
       content: parsedGemini?.content || '',
-      image1: getHighResImageUrl(item.image_url || ''),
-      bodyImages: (scraped.wordCount > 0 && Array.isArray(scraped.bodyImages) && scraped.bodyImages.length > 0) ? scraped.bodyImages : [getHighResImageUrl(item.image_url)],
+      image1: finalFeaturedImage,
+      bodyImages: finalBodyImages,
       bodyImageAltTags: Array.isArray(parsedGemini?.body_image_alt_tags) ? parsedGemini.body_image_alt_tags : [],
       featuredImageAlt: parsedGemini?.featured_image_alt || `${parsedGemini?.focus_keyword || item.title} - latest news and updates`,
       parent_category: parentCategory,

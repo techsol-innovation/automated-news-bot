@@ -1,0 +1,43 @@
+name: AI SEO Audit & Telegram Alerts (Phase 1)
+
+on:
+  schedule:
+    - cron: '0 0 */3 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  seo-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run AI SEO Audit Pipeline
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || vars.GEMINI_API_KEY }}
+          WP_USERNAME: ${{ secrets.WP_USERNAME || vars.WP_USERNAME }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD || vars.WP_APP_PASSWORD }}
+          WP_URL: ${{ secrets.WP_URL || vars.WP_URL }}
+          GSC_CREDENTIALS: ${{ secrets.GSC_CREDENTIALS }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: node audit.js
+
+      - name: Commit and Push Audit Data
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Automated SEO Audit: Updated audit_data.json"
+          file_pattern: "audit_data.json"

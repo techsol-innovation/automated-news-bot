@@ -344,7 +344,7 @@ async function sendTelegramNotification(auditResults) {
         [
           {
             text: '🛠 Approve & Run Fixer',
-            url: 'https://github.com/techsol-innovation/automated-news-bot/actions'
+            callback_data: 'trigger_fix'
           }
         ]
       ]

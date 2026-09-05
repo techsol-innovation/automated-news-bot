@@ -1,0 +1,9 @@
+# ========================================================
+# CONTINUOUS SEO MEMORY — LEARNED AUDIT DIRECTIVES
+# Automatically updated by fixer.js
+# ========================================================
+Always front-load the target calendar year in headlines for annual or trending topics and maintain clean, descriptive permalinks devoid of trailing numerical suffixes.
+Inject high-intent specific details, such as exact monetary values or prominent brand controversies, directly into titles to maximize click-through rates.
+Incorporate precise geographic identifiers and distinct organization names into titles and first-level headings for all localized news and regional events.
+Structure titles using natural semantic relationships that prioritize practical search intent over clunky, passive keyword-stacking.
+Deploy matching structured data schemas, including Event, FAQ, NewsArticle, and Person, to win rich results and interactive search engine results page features.

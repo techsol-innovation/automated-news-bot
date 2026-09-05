@@ -1,0 +1,39 @@
+name: AI SEO Fixer & Self-Learning (Phase 2 & 3)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  seo-fixer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run AI SEO Fixer Pipeline
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || vars.GEMINI_API_KEY }}
+          WP_USERNAME: ${{ secrets.WP_USERNAME || vars.WP_USERNAME }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD || vars.WP_APP_PASSWORD }}
+          WP_URL: ${{ secrets.WP_URL || vars.WP_URL }}
+          GSC_CREDENTIALS: ${{ secrets.GSC_CREDENTIALS }}
+        run: node fixer.js
+
+      - name: Commit Updated SEO Memory & Cleanups
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Automated SEO Fixer: Applied fixes and updated seo_memory.txt"
+          file_pattern: "seo_memory.txt audit_data.json"

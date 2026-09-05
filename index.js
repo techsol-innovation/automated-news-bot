@@ -326,13 +326,40 @@ async function generateArticles(topicTitle, scrapedText, topicType = 'news') {
   - NEVER use generic questions. Every question must be answerable with a specific fact from the article.
   - The entire FAQ section MUST be wrapped in: <div itemscope itemtype="https://schema.org/FAQPage">...</div>`;
 
+  // ── Learned SEO Rules (Self-Learning Loop) ──
+  let learnedSeoRulesBlock = '';
+  const seoMemoryFile = 'seo_memory.txt';
+  if (fs.existsSync(seoMemoryFile)) {
+    try {
+      const memoryContent = fs.readFileSync(seoMemoryFile, 'utf8').trim();
+      if (memoryContent) {
+        const formattedRules = memoryContent
+          .split('\n')
+          .map(l => l.trim())
+          .filter(l => l && !l.startsWith('#'))
+          .map(l => `  * ${l}`)
+          .join('\n');
+
+        if (formattedRules) {
+          learnedSeoRulesBlock = `
+- 🧠 STRICT LEARNED RULES (CONTINUOUS LEARNING LOOP FROM RECENT AUDITS — ZERO TOLERANCE):
+  These rules were extracted directly from real Google Search Console performance and historical audit data. You MUST obey every single rule below to prevent past ranking penalties:
+${formattedRules}
+`;
+        }
+      }
+    } catch (memErr) {
+      console.warn(`[SEO Memory Warning] Failed to read ${seoMemoryFile}: ${memErr.message}`);
+    }
+  }
+
   const prompt = `You are an award-winning Senior Journalist, Elite Copywriter, and SEO Strategist for a top-tier US entertainment and sports media brand. Your single goal is to write PREMIUM, deeply researched, magazine-quality content that earns 2000+ word counts, high dwell time, and dominates Google AI Overviews and Perplexity citations.
 I have scraped news about the trending topic: "${topicTitle}". Extracted text:
 ${scrapedText}
 
 Write a high-quality, deeply detailed ${isNetWorth ? 'Net Worth & Lifestyle breakdown' : 'news'} article based on the provided text.
 
-STRICT INSTRUCTIONS:
+STRICT INSTRUCTIONS:${learnedSeoRulesBlock}
 - PROFESSIONAL TONE & FORMATTING: Do NOT use emojis (like ⚡, 💰) in headings, summary boxes, or anywhere in the article. Keep the tone strictly professional and journalistic.
 - BACKLINKO PRIMARY KEYWORD IDENTIFICATION (Step 1 — Do This FIRST): Analyze the topic and extract a clear 2-4 word primary target keyword that real US users would type into Google. This is your focus_keyword. Examples: 'LeBron James Net Worth', 'Taylor Swift Boyfriend', 'NFL Draft 2026', 'Patrick Mahomes Contract'. The keyword MUST be specific enough to target a real search query, NOT generic.
 - FRONT-LOADED KEYWORD PLACEMENT (Backlinko Rule #3): You MUST place the EXACT primary focus_keyword within the FIRST 50-100 words of the opening section. Google puts more weight on terms that appear at the top of your page. This is non-negotiable.

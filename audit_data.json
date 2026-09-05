@@ -1,0 +1,44 @@
+{
+  "auditTimestamp": "2026-09-05T16:45:59.472Z",
+  "siteUrl": "https://brightcelebrity.com/",
+  "analyzedPostCount": 5,
+  "gscStatus": "success",
+  "auditResults": [
+    {
+      "postId": 9968,
+      "currentTitle": "Taylor Swift Net Worth 2026: 7 Secrets of Her $1.5B Empire",
+      "postLink": "https://brightcelebrity.com/taylor-swift-net-worth-44/",
+      "seoIssue": "Weak CTR appeal and lack of direct search intent alignment with high-volume 'net worth' search queries.",
+      "suggestedTitle": "Taylor Swift Net Worth 2026: How She Hit $1.5B (Revealed)",
+      "suggestedFix": "Optimize title for higher clickability by shifting the focus to 'how' she achieved the wealth. Ensure the H2s use semantic entities related to her business ventures and touring revenue to capture featured snippet opportunities."
+    },
+    {
+      "postId": 9967,
+      "currentTitle": "Caitlin Clark Net Worth 2026: Her Massive Nike Deal Revealed",
+      "seoIssue": "Title is descriptive but misses the 'explosive' growth hook that triggers CTR in sports media SERPs.",
+      "suggestedTitle": "Caitlin Clark Net Worth 2026: Her $20M+ Empire & Nike Deal",
+      "suggestedFix": "Incorporate specific estimated dollar values in the title. Add a 'Quick Net Worth Snapshot' section at the top of the article to satisfy Google's 'People Also Ask' intent immediately."
+    },
+    {
+      "postId": 9965,
+      "currentTitle": "Massena-O’burg News: 7 Critical Updates for Sept 5, 2026",
+      "seoIssue": "Hyper-local content is suffering from non-specific search intent and lack of clear entity association for broader indexing.",
+      "suggestedTitle": "Massena-O’burg News: 7 Major Updates (Sept 5, 2026)",
+      "suggestedFix": "The current title is too generic for high-intent searchers. Add location-specific entities (county, state) into the meta description and image alt text to boost geographic relevance for local search engines."
+    },
+    {
+      "postId": 9963,
+      "currentTitle": "Conway Concert in the Park 2026: 5 Reasons to Attend",
+      "seoIssue": "Low click appeal; '5 Reasons to Attend' is a weak hook for an event-based query which requires date and utility info.",
+      "suggestedTitle": "Conway Concert in the Park: Date, Time & Free Details",
+      "suggestedFix": "Switch to a utility-focused title. Implement Event Schema markup so Google displays the date/time in the search results, significantly increasing visibility for local event seekers."
+    },
+    {
+      "postId": 9961,
+      "currentTitle": "Etihad CEO: 7 Ways Iran Conflict Impacts 2026 Flights",
+      "seoIssue": "Title is wordy and lacks the urgency/authority needed for a breaking news/aviation economic analysis piece.",
+      "suggestedTitle": "Etihad CEO Warns: 7 Ways Iran Conflict Hits 2026 Flights",
+      "suggestedFix": "Front-load the authority figure (CEO) and the source of the conflict. Ensure the content includes 'Expert Insight' blocks to improve E-E-A-T signals, which are critical for news-related topics."
+    }
+  ]
+}

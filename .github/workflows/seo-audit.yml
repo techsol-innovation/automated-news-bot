@@ -27,10 +27,10 @@ jobs:
 
       - name: Run AI SEO Audit Pipeline
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || vars.GEMINI_API_KEY }}
+          WP_URL: ${{ secrets.WP_URL || vars.WP_URL || 'https://brightcelebrity.com/' }}
           WP_USERNAME: ${{ secrets.WP_USERNAME || vars.WP_USERNAME }}
           WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD || vars.WP_APP_PASSWORD }}
-          WP_URL: ${{ secrets.WP_URL || vars.WP_URL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || vars.GEMINI_API_KEY }}
           GSC_CREDENTIALS: ${{ secrets.GSC_CREDENTIALS }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}

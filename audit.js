@@ -6,7 +6,9 @@ const { google } = require('googleapis');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // ── Environment Validation ──
-const WP_URL = process.env.WP_URL || 'https://brightcelebrity.com/';
+const WP_URL = (process.env.WP_URL && process.env.WP_URL.trim()) ? process.env.WP_URL.trim() : 'https://brightcelebrity.com/';
+const WP_USERNAME = process.env.WP_USERNAME;
+const WP_APP_PASSWORD = process.env.WP_APP_PASSWORD;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
@@ -137,31 +139,71 @@ async function fetchRecentWordPressPosts() {
   const wpBaseUrl = WP_URL.replace(/\/$/, '');
   const endpoint = `${wpBaseUrl}/wp-json/wp/v2/posts?per_page=5&orderby=date&order=desc&_nocache=${Date.now()}`;
 
-  // Public endpoint: omit Authorization header to prevent CDN nonce 403 errors
+  // Public endpoint headers with browser emulation to bypass CDN blocks
   const headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'application/json, text/plain, */*'
   };
 
-  const response = await axios.get(endpoint, { headers, timeout: 15000 });
-  const posts = response.data || [];
+  try {
+    const response = await axios.get(endpoint, { headers, timeout: 15000 });
+    const posts = response.data || [];
 
-  console.log(`  ↳ Successfully fetched ${posts.length} WordPress posts.`);
+    console.log(`  ↳ Successfully fetched ${posts.length} WordPress posts.`);
 
-  return posts.map(p => {
-    const cleanTitle = p.title?.rendered ? cheerio.load(p.title.rendered).text().trim() : p.slug;
-    const cleanExcerpt = p.excerpt?.rendered ? cheerio.load(p.excerpt.rendered).text().replace(/\s+/g, ' ').trim() : '';
-    const cleanContent = p.content?.rendered ? cheerio.load(p.content.rendered).text().replace(/\s+/g, ' ').trim().slice(0, 500) : '';
+    return posts.map(p => {
+      const cleanTitle = p.title?.rendered ? cheerio.load(p.title.rendered).text().trim() : p.slug;
+      const cleanExcerpt = p.excerpt?.rendered ? cheerio.load(p.excerpt.rendered).text().replace(/\s+/g, ' ').trim() : '';
+      const cleanContent = p.content?.rendered ? cheerio.load(p.content.rendered).text().replace(/\s+/g, ' ').trim().slice(0, 500) : '';
 
-    return {
-      postId: p.id,
-      title: cleanTitle,
-      slug: p.slug,
-      link: p.link,
-      date: p.date,
-      excerpt: cleanExcerpt,
-      contentSnippet: cleanContent
-    };
-  });
+      return {
+        postId: p.id,
+        title: cleanTitle,
+        slug: p.slug,
+        link: p.link,
+        date: p.date,
+        excerpt: cleanExcerpt,
+        contentSnippet: cleanContent
+      };
+    });
+  } catch (err) {
+    console.error('Audit Fatal Error Details:', err.response?.data || err.response?.status || err.message);
+
+    // Fallback attempt: if public GET was blocked, retry with Basic Auth if credentials are present
+    if (WP_USERNAME && WP_APP_PASSWORD) {
+      try {
+        console.log('  ↳ Retrying WordPress posts fetch with Basic Auth fallback...');
+        const credentials = `${WP_USERNAME}:${WP_APP_PASSWORD}`;
+        const token = Buffer.from(credentials).toString('base64');
+        const authHeaders = {
+          ...headers,
+          'Authorization': `Basic ${token}`
+        };
+        const authResp = await axios.get(endpoint, { headers: authHeaders, timeout: 15000 });
+        const posts = authResp.data || [];
+        console.log(`  ↳ Successfully fetched ${posts.length} WordPress posts (via auth fallback).`);
+        return posts.map(p => {
+          const cleanTitle = p.title?.rendered ? cheerio.load(p.title.rendered).text().trim() : p.slug;
+          const cleanExcerpt = p.excerpt?.rendered ? cheerio.load(p.excerpt.rendered).text().replace(/\s+/g, ' ').trim() : '';
+          const cleanContent = p.content?.rendered ? cheerio.load(p.content.rendered).text().replace(/\s+/g, ' ').trim().slice(0, 500) : '';
+
+          return {
+            postId: p.id,
+            title: cleanTitle,
+            slug: p.slug,
+            link: p.link,
+            date: p.date,
+            excerpt: cleanExcerpt,
+            contentSnippet: cleanContent
+          };
+        });
+      } catch (authErr) {
+        console.error('Audit Fatal Error Details (Auth Fallback):', authErr.response?.data || authErr.response?.status || authErr.message);
+        throw authErr;
+      }
+    }
+    throw err;
+  }
 }
 
 /**
@@ -365,7 +407,8 @@ async function runAudit() {
     console.log('       🎉 AI SEO AUDIT PIPELINE COMPLETED SUCCESSFULLY  ');
     console.log('═══════════════════════════════════════════════════════');
   } catch (error) {
-    console.error(`[Audit Fatal Error] ${error.message}`);
+    const errorDetails = error.response?.data || error.response?.status || error.message || error;
+    console.error('Audit Fatal Error Details:', errorDetails);
     process.exit(1);
   }
 }

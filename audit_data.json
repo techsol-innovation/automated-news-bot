@@ -1,0 +1,48 @@
+{
+  "auditTimestamp": "2026-09-06T07:17:33.487Z",
+  "siteUrl": "https://brightcelebrity.com/",
+  "analyzedPostCount": 5,
+  "gscStatus": "success",
+  "auditResults": [
+    {
+      "postId": 10219,
+      "currentTitle": "UFC Paris 2026: 7 Massive Reasons This Event Is Changing MMA History",
+      "postLink": "https://brightcelebrity.com/ufc-paris-2026/",
+      "seoIssue": "Low search intent alignment; title focuses on 'reasons' rather than 'results' or 'fight card' which are the primary high-volume queries for event-based SEO.",
+      "suggestedTitle": "UFC Paris 2026 Results: Hooker vs Parnasse Fight Card Recap",
+      "suggestedFix": "Front-load the term 'Results' and 'Fight Card'. Add specific fighter names to the H1 and Meta Title to capture entity-based traffic. Implement SportsEvent Schema."
+    },
+    {
+      "postId": 10217,
+      "currentTitle": "Natalie Portman Net Worth: 7 Massive Secrets Behind Her 2026 Fortune",
+      "postLink": "https://brightcelebrity.com/natalie-portman-net-worth-2/",
+      "seoIssue": "Keyword dilution from '7 Massive Secrets' phrasing; target year and specific dollar amount are missing from the front of the title, reducing CTR for financial intent.",
+      "suggestedTitle": "Natalie Portman Net Worth 2026: How She Hits $105 Million",
+      "suggestedFix": "Inject the exact net worth figure ($105M) into the title. Add a 'Financial Summary' table in the first fold and use FAQ Schema to answer 'How did Natalie Portman get rich?'"
+    },
+    {
+      "postId": 10216,
+      "currentTitle": "Draymond Green Net Worth: 7 Massive Secrets Behind His 2026 Financial Empire",
+      "postLink": "https://brightcelebrity.com/draymond-green-net-worth/",
+      "seoIssue": "Vague power words like 'Financial Empire' underperform against high-intent queries like 'Salary' or 'Earnings'. Title is too long for mobile SERPs.",
+      "suggestedTitle": "Draymond Green Net Worth 2026: Salary & Media Earnings",
+      "suggestedFix": "Update the H1 to include 'NBA Salary' and 'The Volume'. Ensure the meta description highlights his current contract value to improve E-E-A-T and CTR."
+    },
+    {
+      "postId": 10214,
+      "currentTitle": "Romance Crake Guide: 7 Ultimate Secrets To Winning The Warrior’s Heart",
+      "postLink": "https://brightcelebrity.com/romance-crake-guide/",
+      "seoIssue": "Missing the core game title 'The Blood of Dawnwalker' in the SEO title, leading to zero impressions for the specific gaming audience looking for a walkthrough.",
+      "suggestedTitle": "Crake Romance Guide: Blood of Dawnwalker Dialogue Choices",
+      "suggestedFix": "Front-load 'Crake Romance Guide' and include the game name. Add a list of 'Dialogue Choices' with bullet points and use HowTo Schema to capture the featured snippet."
+    },
+    {
+      "postId": 10212,
+      "currentTitle": "Spartacus Netflix 2024: 7 Shocking Reasons to Binge This Epic Series Now",
+      "postLink": "https://brightcelebrity.com/spartacus-netflix-2024/",
+      "seoIssue": "Passive title phrasing and date confusion (2024 vs 2026 publication). Fails to address the 'Leaving Netflix' search intent which is the primary driver for this topic.",
+      "suggestedTitle": "Is Spartacus Leaving Netflix? 2024 Removal Date & Guide",
+      "suggestedFix": "Pivot title to focus on 'Leaving Netflix' or 'Removal Date'. Update the slug to remove 2024 if possible, and include a 'Where to Watch' section to capture secondary search intent."
+    }
+  ]
+}

@@ -360,11 +360,18 @@ ${scrapedText}
 Write a high-quality, deeply detailed ${isNetWorth ? 'Net Worth & Lifestyle breakdown' : 'news'} article based on the provided text.
 
 STRICT INSTRUCTIONS:${learnedSeoRulesBlock}
+- STRICT TITLE SEO RULES (CRITICAL):
+  * BAN LIST (ZERO TOLERANCE): Never use formulaic, repetitive clickbait phrases like "7 Massive Secrets", "7 Ultimate Reasons", "Shocking Reasons", or "Financial Empire". These templates destroy search intent and trigger Google SERP demotions.
+  * Net Worth / Finance: Must include the exact Year, specific Dollar Amount (if known), and high-intent words like "Salary" or "Earnings" (e.g., "Name Net Worth 2026: Salary & Earnings").
+  * Sports / Events: Must focus on outcome-driven keywords like "Results", "Fight Card", or "Recap" instead of "Reasons to watch" (e.g., "Event Name 2026 Results: Main Fight Card").
+  * Gaming / Guides: Must ALWAYS include the core Game Title alongside the specific guide topic (e.g., "Character Name Guide: [Game Title] Walkthrough").
+  * TV / Streaming: Address primary search intent like "Removal Date", "Release Date", or "Cast" instead of passive phrasing.
+  * Length: Keep all titles strictly under 60 characters for mobile SERPs.
 - PROFESSIONAL TONE & FORMATTING: Do NOT use emojis (like ⚡, 💰) in headings, summary boxes, or anywhere in the article. Keep the tone strictly professional and journalistic.
 - BACKLINKO PRIMARY KEYWORD IDENTIFICATION (Step 1 — Do This FIRST): Analyze the topic and extract a clear 2-4 word primary target keyword that real US users would type into Google. This is your focus_keyword. Examples: 'LeBron James Net Worth', 'Taylor Swift Boyfriend', 'NFL Draft 2026', 'Patrick Mahomes Contract'. The keyword MUST be specific enough to target a real search query, NOT generic.
 - FRONT-LOADED KEYWORD PLACEMENT (Backlinko Rule #3): You MUST place the EXACT primary focus_keyword within the FIRST 50-100 words of the opening section. Google puts more weight on terms that appear at the top of your page. This is non-negotiable.
 - Forced Exact String Match (Zero Tolerance): You MUST use this EXACT focus_keyword string, character-for-character, in:
-  1. title: MUST contain a Number (e.g., 5, 7) and a Power Word (e.g., Shocking, Massive, Ultimate). The title MUST strictly start with the exact focus_keyword, followed by a colon (:). Example Format: '[Focus Keyword]: 7 [Power Word] Secrets Behind This [Sentiment Word] Event'. The title tag is the MOST important place for your keyword (Backlinko Rule #4).
+  1. title: Strictly obey the "STRICT TITLE SEO RULES (CRITICAL)" above. Must start with or prominently feature the exact focus_keyword, match niche-specific search intent, stay strictly under 60 characters, and NEVER use banned clickbait templates.
   2. seo_description: The very first words of this description MUST be the exact focus_keyword. The description MUST be strictly between 120 and 160 characters long. Write it to MAXIMIZE click-through rate (CTR) — use curiosity, numbers, or emotional triggers. This is your ad copy in the SERPs (Backlinko Rule #10 & #15).
   3. slug: The URL slug MUST be the exact focus_keyword (lowercase, hyphenated). Keep it SHORT and keyword-focused. Example: 'lebron-james-net-worth' NOT 'lebron-james-net-worth-2026-complete-salary-breakdown'. (Backlinko Rule #2).
   4. content: Ensure the exact focus_keyword appears naturally in the very FIRST SENTENCE of the HTML content (First 50-100 words rule).
@@ -409,7 +416,7 @@ ${faqBlock}
 
 CRITICAL OUTPUT REQUIREMENT: You MUST return ONLY valid JSON formatted strictly as follows, without any markdown backticks, explanations, or extra text. NEVER use literal \n or \r characters in the content string. Use proper HTML tags like <p> and <br> for spacing:
 {
-  "title": "Simple direct headline",
+  "title": "Intent-driven SEO headline under 60 chars following STRICT TITLE SEO RULES",
   "content": "Full HTML article body text following the formatting rules...",
   "parent_category": "Broad Category (e.g., Sports, Entertainment)",
   "sub_categories": ["Sub-category 1", "Sub-category 2"],

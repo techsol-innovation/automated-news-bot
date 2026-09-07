@@ -1,48 +1,53 @@
 {
-  "auditTimestamp": "2026-09-06T07:17:33.487Z",
+  "auditTimestamp": "2026-09-07T03:05:24.719Z",
   "siteUrl": "https://brightcelebrity.com/",
   "analyzedPostCount": 5,
   "gscStatus": "success",
   "auditResults": [
     {
-      "postId": 10219,
-      "currentTitle": "UFC Paris 2026: 7 Massive Reasons This Event Is Changing MMA History",
-      "postLink": "https://brightcelebrity.com/ufc-paris-2026/",
-      "seoIssue": "Low search intent alignment; title focuses on 'reasons' rather than 'results' or 'fight card' which are the primary high-volume queries for event-based SEO.",
-      "suggestedTitle": "UFC Paris 2026 Results: Hooker vs Parnasse Fight Card Recap",
-      "suggestedFix": "Front-load the term 'Results' and 'Fight Card'. Add specific fighter names to the H1 and Meta Title to capture entity-based traffic. Implement SportsEvent Schema."
+      "postId": 10566,
+      "currentTitle": "Taylor Swift Net Worth 2026: Salary & Earnings Breakdown",
+      "postLink": "https://brightcelebrity.com/taylor-swift-net-worth-2026-31/",
+      "date": "2026-09-07T07:37:23",
+      "seoIssue": "Keyword cannibalization indicated by slug suffix '-31' and generic title structure that lacks a high-CTR financial hook. The GSC data shows 'net worth 2025' volume is being missed by targeting 2026 exclusively without historical context.",
+      "suggestedTitle": "Taylor Swift’s Net Worth 2026: How She Built a $1.8B Empire",
+      "suggestedFix": "Redirect the '-31' slug to a clean version to consolidate link equity. Front-load the '$1.8B' figure into the SEO title and Meta Description. Implement 'FinancialQuote' and 'Person' Schema to capture rich snippets for net worth queries."
     },
     {
-      "postId": 10217,
-      "currentTitle": "Natalie Portman Net Worth: 7 Massive Secrets Behind Her 2026 Fortune",
-      "postLink": "https://brightcelebrity.com/natalie-portman-net-worth-2/",
-      "seoIssue": "Keyword dilution from '7 Massive Secrets' phrasing; target year and specific dollar amount are missing from the front of the title, reducing CTR for financial intent.",
-      "suggestedTitle": "Natalie Portman Net Worth 2026: How She Hits $105 Million",
-      "suggestedFix": "Inject the exact net worth figure ($105M) into the title. Add a 'Financial Summary' table in the first fold and use FAQ Schema to answer 'How did Natalie Portman get rich?'"
+      "postId": 10565,
+      "currentTitle": "LeBron James Net Worth 2026: Salary & Total Earnings",
+      "postLink": "https://brightcelebrity.com/lebron-james-net-worth-86/",
+      "date": "2026-09-07T07:37:12",
+      "seoIssue": "Low CTR due to passive phrasing and lack of 'Billionaire' entity optimization. The slug '-86' suggests significant content duplication or internal competition issues.",
+      "suggestedTitle": "LeBron James Net Worth 2026: NBA Salary & $1.2B Portfolio",
+      "suggestedFix": "Clean the URL slug to remove numerical suffixes. Update H1 to include 'Billionaire Status' to trigger Google's Knowledge Graph associations. Add an 'Income Table' at the top of the post to improve 'Time on Page' and E-E-A-T."
     },
     {
-      "postId": 10216,
-      "currentTitle": "Draymond Green Net Worth: 7 Massive Secrets Behind His 2026 Financial Empire",
-      "postLink": "https://brightcelebrity.com/draymond-green-net-worth/",
-      "seoIssue": "Vague power words like 'Financial Empire' underperform against high-intent queries like 'Salary' or 'Earnings'. Title is too long for mobile SERPs.",
-      "suggestedTitle": "Draymond Green Net Worth 2026: Salary & Media Earnings",
-      "suggestedFix": "Update the H1 to include 'NBA Salary' and 'The Volume'. Ensure the meta description highlights his current contract value to improve E-E-A-T and CTR."
+      "postId": 10564,
+      "currentTitle": "10 Marvel Comics Characters Smarter Than Reed Richards 2026",
+      "postLink": "https://brightcelebrity.com/10-marvel-comics-characters-smarter-than-reed-richards/",
+      "date": "2026-09-07T07:36:58",
+      "seoIssue": "Misaligned search intent; users searching for comic lore rarely use a year modifier (2026). The title lacks 'Ranked' or 'Official' power words used by high-authority fan sites.",
+      "suggestedTitle": "10 Marvel Characters Smarter Than Reed Richards (Ranked)",
+      "suggestedFix": "Remove '2026' from the title and H1 as it dilutes topical authority for evergreen lore. Add 'Ranked' to the title. Insert an 'ItemListing' Schema to help Google understand the listicle structure for carousels."
     },
     {
-      "postId": 10214,
-      "currentTitle": "Romance Crake Guide: 7 Ultimate Secrets To Winning The Warrior’s Heart",
-      "postLink": "https://brightcelebrity.com/romance-crake-guide/",
-      "seoIssue": "Missing the core game title 'The Blood of Dawnwalker' in the SEO title, leading to zero impressions for the specific gaming audience looking for a walkthrough.",
-      "suggestedTitle": "Crake Romance Guide: Blood of Dawnwalker Dialogue Choices",
-      "suggestedFix": "Front-load 'Crake Romance Guide' and include the game name. Add a list of 'Dialogue Choices' with bullet points and use HowTo Schema to capture the featured snippet."
+      "postId": 10562,
+      "currentTitle": "Adriana La Cerva Death: The Sopranos Legacy 2024",
+      "postLink": "https://brightcelebrity.com/adriana-la-cerva-death/",
+      "date": "2026-09-07T07:36:29",
+      "seoIssue": "Outdated year modifier (2024) in the title of a 2026 post creates a trust conflict for users and crawlers. Lacks the 'Why' or 'Explained' hook that drives Sopranos-related search traffic.",
+      "suggestedTitle": "Adriana La Cerva’s Death: The Sopranos’ Most Tragic Exit",
+      "suggestedFix": "Remove '2024' and replace with a power word like 'Tragic' or 'Explained'. Add FAQ Schema targeting 'Who killed Adriana?' and 'Which episode does Adriana die?' to capture 'People Also Ask' (PAA) box real estate."
     },
     {
-      "postId": 10212,
-      "currentTitle": "Spartacus Netflix 2024: 7 Shocking Reasons to Binge This Epic Series Now",
-      "postLink": "https://brightcelebrity.com/spartacus-netflix-2024/",
-      "seoIssue": "Passive title phrasing and date confusion (2024 vs 2026 publication). Fails to address the 'Leaving Netflix' search intent which is the primary driver for this topic.",
-      "suggestedTitle": "Is Spartacus Leaving Netflix? 2024 Removal Date & Guide",
-      "suggestedFix": "Pivot title to focus on 'Leaving Netflix' or 'Removal Date'. Update the slug to remove 2024 if possible, and include a 'Where to Watch' section to capture secondary search intent."
+      "postId": 10560,
+      "currentTitle": "Michael Phillips Surgery 2026: Life-Changing Transformation",
+      "postLink": "https://brightcelebrity.com/michael-phillips-surgery-2026/",
+      "date": "2026-09-07T07:36:06",
+      "seoIssue": "Weak search intent match for 'Michael Phillips', which is a high-ambiguity entity. The title lacks 'Update' or 'Before/After' modifiers which drive the majority of surgery-related news clicks.",
+      "suggestedTitle": "Michael Phillips Surgery 2026: Results & Recovery Update",
+      "suggestedFix": "Add 'Update' and 'Results' to the title. Optimize the first 100 words to define the specific 'Michael Phillips' (e.g., athlete, actor, influencer) to resolve entity ambiguity. Implement Image Object Schema for transformation photos."
     }
   ]
 }

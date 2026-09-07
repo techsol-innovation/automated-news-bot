@@ -11,3 +11,8 @@ Always incorporate the current calendar year and specific high-value metrics, fi
 Align headline hooks and subheaders with verified user search intent by integrating trending platforms, viral modifiers, and precise long-tail keywords instead of broad conceptual terms.
 Implement highly specific schema markup, such as ItemList, FAQ, or customized Article properties, to match the content structure and capture rich search results.
 Enforce clean, semantic URL permalinks by removing trailing auto-generated IDs or duplicate slugs to preserve crawl equity and keyword focus.
+Ensure all URL slugs are clean, descriptive, and strictly prohibited from containing numerical suffixes that indicate content duplication or keyword cannibalization.
+Integrate high-CTR power words, specific financial figures, or status modifiers into SEO titles to align with user search intent and drive engagement.
+Restrict the use of year modifiers to time-sensitive or annual events while excluding them from evergreen lore to preserve topical authority.
+Resolve entity ambiguity within the first 100 words and implement relevant structured data schema to capture rich snippets and Knowledge Graph associations.
+Include structured elements like data tables, list-item schema, or FAQ sections to improve user dwell time and capture 'People Also Ask' real estate.

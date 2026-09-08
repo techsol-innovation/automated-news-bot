@@ -59,11 +59,25 @@ async function auditSitemaps() {
     
     console.log(`\n📊 Total Live Post URLs Extracted: ${allPostUrls.length}`);
     
-    // Scan for duplicate slugs using regex
-    // Looks for a hyphen followed by 1 to 5 digits at the end of the URL or right before a trailing slash
-    const duplicatePattern = /-\d{1,5}\/?$/;
+    // Scan for duplicate slugs dynamically
+    // A URL is considered a duplicate if it ends in -number AND its base version exists.
+    const duplicatePattern = /-(\d{1,5})(\/?)$/;
     
-    const duplicateUrls = allPostUrls.filter(url => duplicatePattern.test(url));
+    const duplicateUrls = allPostUrls.filter(url => {
+      const match = url.match(duplicatePattern);
+      if (!match) return false;
+      
+      const numberPart = match[1];
+      // Ignore exactly 4-digit numbers as they are usually years (e.g., -2024, -2026)
+      if (numberPart.length === 4) return false;
+
+      // Reconstruct the base URL (retaining trailing slash if present)
+      const trailingSlash = match[2] || '';
+      const baseUrl = url.replace(duplicatePattern, trailingSlash);
+      
+      // It's only a duplicate if the base URL also exists in the sitemap array
+      return allPostUrls.includes(baseUrl);
+    });
     
     console.log(`\n⚠️ Total Duplicates Found: ${duplicateUrls.length}`);
     if (duplicateUrls.length > 0) {

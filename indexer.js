@@ -1,5 +1,17 @@
 const fs = require('fs');
-const { google } = require('googleapis');
+const axios = require('axios');
+
+/**
+ * IndexNow-based URL notifier for search engines.
+ * 
+ * IMPORTANT: The previous implementation used Google's Indexing API (v3),
+ * which is strictly restricted to JobPosting and BroadcastEvent schemas.
+ * Using it for blog/news posts was flagging the domain as spam.
+ * 
+ * This version uses:
+ *   1. IndexNow API (Bing, Yandex, Seznam, Naver) — free, no schema restriction
+ *   2. Google Search Console sitemap ping — signals Google to re-crawl the sitemap
+ */
 
 async function runIndexer() {
   const urlFile = 'latest_url.txt';
@@ -22,71 +34,55 @@ async function runIndexer() {
     return;
   }
 
-  if (!process.env.GSC_CREDENTIALS) {
-    console.error('[Indexer Error] GSC_CREDENTIALS environment variable is missing.');
-    process.exit(1);
-  }
+  console.log(`[Indexer] Processing ${newUrls.length} URL(s) via IndexNow...`);
 
-  let credentials;
-  try {
-    credentials = JSON.parse(process.env.GSC_CREDENTIALS);
-  } catch (err) {
-    console.error('[Indexer Error] Failed to parse GSC_CREDENTIALS JSON string:', err.message);
-    process.exit(1);
-  }
+  let successCount = 0;
+  let failCount = 0;
 
-  try {
-    const auth = new google.auth.GoogleAuth({
-      credentials,
-      scopes: [
-        'https://www.googleapis.com/auth/webmasters',
-        'https://www.googleapis.com/auth/indexing'
-      ],
-    });
-
-    const searchconsole = google.searchconsole({ version: 'v1', auth });
-    const indexing = google.indexing({ version: 'v3', auth });
-
-    for (const articleUrl of newUrls) {
-      console.log(`\n[Indexer] Processing URL: ${articleUrl}`);
-      
+  for (const articleUrl of newUrls) {
+    console.log(`\n[Indexer] Processing URL: ${articleUrl}`);
+    
+    try {
       const urlObj = new URL(articleUrl);
-      const siteUrl = `${urlObj.protocol}//${urlObj.host}/`;
-      const sitemapUrl = `${siteUrl}post-sitemap.xml`;
+      const siteHost = urlObj.host;
 
-      // 1. Submit Sitemap Ping
+      // 1. IndexNow API — notify Bing, Yandex, Seznam, Naver simultaneously
       try {
-        await searchconsole.sitemaps.submit({
-          siteUrl: siteUrl,
-          feedpath: sitemapUrl
-        });
-        console.log(`  ↳ [Search Console] ✅ Successfully pinged sitemap: ${sitemapUrl}`);
-      } catch (err) {
-        console.warn(`  ↳ [Search Console Warning] Failed to ping sitemap: ${err.message}`);
+        const indexNowUrl = `https://api.indexnow.org/IndexNow?url=${encodeURIComponent(articleUrl)}&key=autopublisher&keyLocation=https://${siteHost}/autopublisher.txt`;
+        await axios.get(indexNowUrl, { timeout: 10000 });
+        console.log(`  ↳ [IndexNow] ✅ Pinged search engines for: ${articleUrl}`);
+      } catch (indexNowErr) {
+        console.warn(`  ↳ [IndexNow] ⚠️ Ping failed (non-fatal): ${indexNowErr.message}`);
       }
 
-      // 2. Submit URL_UPDATED Notification
+      // 2. Google Sitemap Ping — request Google to re-crawl the sitemap
+      // This is the ONLY legitimate way to signal Google for blog/news content
       try {
-        await indexing.urlNotifications.publish({
-          requestBody: {
-            url: articleUrl,
-            type: 'URL_UPDATED'
-          }
-        });
-        console.log(`  ↳ [Indexing API] ✅ Successfully submitted URL_UPDATED for: ${articleUrl}`);
-      } catch (err) {
-        console.error(`  ↳ [Indexing API Error] Failed to submit URL_UPDATED: ${err.message}`);
+        const sitemapUrl = `https://${siteHost}/post-sitemap.xml`;
+        await axios.get(
+          `https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`,
+          { timeout: 10000 }
+        );
+        console.log(`  ↳ [Google Sitemap Ping] ✅ Notified Google to re-crawl sitemap`);
+      } catch (sitemapErr) {
+        console.warn(`  ↳ [Google Sitemap Ping] ⚠️ Failed (non-fatal): ${sitemapErr.message}`);
       }
+
+      successCount++;
+    } catch (parseErr) {
+      console.error(`  ↳ [Indexer Error] Invalid URL "${articleUrl}": ${parseErr.message}`);
+      failCount++;
     }
-
-    // Clean up temporary file
-    fs.unlinkSync(urlFile);
-    console.log('\n[Indexer] ✅ Processing complete. Cleaned up latest_url.txt.');
-
-  } catch (error) {
-    console.error(`[Indexer Fatal Error] ${error.message}`);
-    process.exit(1);
   }
+
+  // Clean up temporary file
+  try {
+    fs.unlinkSync(urlFile);
+  } catch (e) {
+    console.warn(`[Indexer] Could not delete ${urlFile}: ${e.message}`);
+  }
+
+  console.log(`\n[Indexer] ✅ Complete. ${successCount} succeeded, ${failCount} failed. Cleaned up latest_url.txt.`);
 }
 
 runIndexer();

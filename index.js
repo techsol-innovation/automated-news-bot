@@ -683,6 +683,32 @@ async function pingIndexNow(postUrl) {
 }
 
 /**
+ * Checks whether a post with the given slug already exists in WordPress.
+ * Used to prevent duplicate slug cannibalization (e.g., slug-2, slug-3, ...).
+ * @param {string} slug - The slug to check
+ * @returns {Promise<boolean>} true if a post with this slug already exists
+ */
+async function checkSlugExists(slug) {
+  try {
+    if (!slug || !process.env.WP_URL) return false;
+    const wpBaseUrl = process.env.WP_URL.replace(/\/$/, '');
+    const resp = await axios.get(
+      `${wpBaseUrl}/wp-json/wp/v2/posts?slug=${encodeURIComponent(slug)}&_fields=id,slug&per_page=1&_nocache=${Date.now()}`,
+      {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        },
+        timeout: 10000
+      }
+    );
+    return Array.isArray(resp.data) && resp.data.length > 0;
+  } catch (err) {
+    console.warn(`  ↳ [Slug Check] Warning: Could not verify slug "${slug}": ${err.message}. Allowing publish.`);
+    return false; // Fail open — don't block publishing if the check itself fails
+  }
+}
+
+/**
  * Helper function to get an existing WordPress category ID by name, or create it if not found.
  * Uses global wpCategoriesMap for in-memory caching to optimize performance.
  * @param {string} categoryName - The name of the category (e.g., 'Football', 'Hollywood')
@@ -1403,6 +1429,13 @@ async function publishToWordPress(article) {
     }
     if (seoSlug.length > 60) {
       seoSlug = seoSlug.substring(0, 60).replace(/-+$/, '');
+    }
+
+    // ═══ DUPLICATE SLUG GUARD — Prevent -2, -3 cannibalization ═══
+    const slugAlreadyExists = await checkSlugExists(seoSlug);
+    if (slugAlreadyExists) {
+      console.log(`  ↳ ⏭️ SKIPPED: Slug "${seoSlug}" already exists on WordPress. Preventing duplicate cannibalization.`);
+      return null;
     }
 
     // Backlinko Rule #10: Ensure meta description is <=160 chars and CTR-optimized

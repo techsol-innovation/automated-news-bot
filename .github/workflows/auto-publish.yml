@@ -1,8 +1,8 @@
-name: CraftZone 1-Hour Auto Publisher
+name: CraftZone Auto Publisher (3x Daily)
 
 on:
   schedule:
-    - cron: '0 * * * *'
+    - cron: '0 6,14,22 * * *'
   workflow_dispatch:
 
 jobs:
@@ -29,7 +29,5 @@ jobs:
           NEWSDATA_API_KEY: ${{ secrets.NEWSDATA_API_KEY || vars.NEWSDATA_API_KEY }}
         run: node index.js
 
-      - name: Run Search Console Indexer
-        env:
-          GSC_CREDENTIALS: ${{ secrets.GSC_CREDENTIALS }}
+      - name: Ping IndexNow for Published URLs
         run: node indexer.js

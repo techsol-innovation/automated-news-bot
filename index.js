@@ -506,25 +506,147 @@ async function fetchRawUSNewsTrends() {
 }
 
 /**
- * Uses Gemini to identify the single most trending US person from a list of news headlines.
+ * Fetches the titles of all posts published on WordPress within the last 24 hours.
+ * Used to prevent topic overlap and ensure content uniqueness across runs.
+ * @returns {Promise<string[]>} Array of post titles
+ */
+async function fetchRecentlyPublishedTitles() {
+  console.log('[Info] Fetching recently published posts from WordPress (last 24h)...');
+  try {
+    if (!process.env.WP_URL) {
+      console.warn('[Warning] WP_URL is not defined in process.env. Skipping recent posts check.');
+      return [];
+    }
+
+    const wpBaseUrl = process.env.WP_URL.replace(/\/$/, '');
+    const afterDate = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    
+    // Public GET endpoint: omit auth headers to avoid Cloudflare/WP Rocket cookie nonce 403 errors
+    const getHeaders = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    };
+
+    const resp = await axios.get(
+      `${wpBaseUrl}/wp-json/wp/v2/posts?after=${encodeURIComponent(afterDate)}&per_page=100&_fields=id,title,slug,date&_nocache=${Date.now()}`,
+      { headers: getHeaders, timeout: 15000 }
+    );
+
+    const posts = Array.isArray(resp.data) ? resp.data : [];
+    const titles = posts.map(p => {
+      const rawTitle = p.title?.rendered || p.title || '';
+      return rawTitle
+        .replace(/&#038;/g, '&')
+        .replace(/&amp;/g, '&')
+        .replace(/&#8217;/g, "'")
+        .replace(/&#8216;/g, "'")
+        .replace(/&#8220;/g, '"')
+        .replace(/&#8221;/g, '"')
+        .replace(/&#8211;/g, '-')
+        .replace(/&#8212;/g, '--')
+        .trim();
+    }).filter(Boolean);
+
+    console.log(`[Info] ✅ Retrieved ${titles.length} posts published in the last 24 hours.`);
+    return titles;
+  } catch (err) {
+    const errMsg = err.response ? `HTTP ${err.response.status}` : err.message;
+    console.warn(`[Warning] Failed to fetch recent posts from WordPress (${errMsg}). Continuing without recent list.`);
+    return [];
+  }
+}
+
+/**
+ * Uses Gemini to curate the top trending news topics from candidate articles,
+ * enforcing strict uniqueness against recently published articles.
+ * @param {Array} candidateNews - Array of raw news objects from NewsData
+ * @param {string} domain - 'sports' or 'entertainment'
+ * @param {number} count - Target number of topics to select (e.g. 2)
+ * @param {Array<string>} recentTitles - Post titles published in the last 24h
+ * @returns {Promise<Array>} Selected topic objects
+ */
+async function curateDomainTopicsWithGemini(candidateNews, domain, count, recentTitles = []) {
+  if (!candidateNews || candidateNews.length === 0) return [];
+  if (candidateNews.length <= count && (!recentTitles || recentTitles.length === 0)) {
+    return candidateNews.slice(0, count);
+  }
+
+  const candidates = candidateNews.slice(0, 15);
+  const headlinesList = candidates.map((item, idx) => `[${idx}] ${item.title} — ${item.description || item.snippet || ''}`).join('\n');
+
+  const coveredSection = (recentTitles && recentTitles.length > 0)
+    ? `\nALREADY COVERED — DO NOT REPEAT:\n${recentTitles.slice(0, 50).map(t => `- ${t}`).join('\n')}\n`
+    : '';
+
+  const prompt = `You are an elite US ${domain} editor. Analyze these candidate trending US ${domain} headlines and select the TOP ${count} most viral, high-interest breaking news stories.
+${coveredSection}
+Candidate Trending Headlines:
+${headlinesList}
+
+STRICT SELECTION RULES:
+- ALREADY COVERED — DO NOT REPEAT: You MUST explicitly ignore any trending topics that closely match or cover the same event, person, or storyline as any title in "ALREADY COVERED — DO NOT REPEAT".
+- Select exactly ${count} distinct, high-impact stories.
+- Return ONLY a JSON array of the chosen indices as integers. Example: [0, 2]
+- Do NOT include markdown code blocks, explanation, or any other text. Output only the JSON array.`;
+
+  try {
+    const result = await geminiModel.generateContent(prompt);
+    const rawText = result.response.text().trim();
+    const cleanJson = rawText.replace(/```json/gi, '').replace(/```/gi, '').trim();
+    const indices = JSON.parse(cleanJson);
+    if (Array.isArray(indices) && indices.length > 0) {
+      const selected = indices
+        .filter(idx => typeof idx === 'number' && idx >= 0 && idx < candidates.length)
+        .slice(0, count)
+        .map(idx => candidates[idx]);
+      if (selected.length > 0) {
+        console.log(`[Curate] Gemini selected ${selected.length} unique ${domain} topics:`);
+        selected.forEach(s => console.log(`  → "${s.title}"`));
+        return selected;
+      }
+    }
+  } catch (err) {
+    console.warn(`[Curate] Gemini ${domain} curation prompt error (${err.message}). Using fallback selection.`);
+  }
+
+  // Fallback: take candidates that don't closely match recentTitles
+  const filtered = candidates.filter(item => {
+    const itemLower = item.title.toLowerCase();
+    return !recentTitles.some(rt => {
+      const rtLower = rt.toLowerCase();
+      return itemLower.includes(rtLower) || rtLower.includes(itemLower);
+    });
+  });
+
+  return (filtered.length >= count ? filtered : candidates).slice(0, count);
+}
+
+/**
+ * Uses Gemini to identify the single most trending US person from a list of news headlines,
+ * strictly excluding any persons or topics covered in the last 24 hours.
  * @param {Array} newsItems - Array of news article objects with 'title' and 'snippet' fields
  * @param {string} domain - Either 'sports' or 'entertainment'
+ * @param {Array<string>} recentTitles - Array of article titles published in the last 24 hours
  * @returns {Promise<string>} The full name of the top trending person
  */
-async function identifyTopTrendingPerson(newsItems, domain) {
+async function identifyTopTrendingPerson(newsItems, domain, recentTitles = []) {
   const headlines = newsItems.map(item => `- ${item.title}`).join('\n');
-  const prompt = `You are an expert US ${domain} analyst. Analyze these trending US ${domain} headlines and identify the SINGLE most talked-about, trending American ${domain === 'sports' ? 'athlete/sports personality' : 'celebrity/entertainer'} right now.
+  const coveredSection = (recentTitles && recentTitles.length > 0)
+    ? `\nALREADY COVERED — DO NOT REPEAT:\n${recentTitles.slice(0, 50).map(t => `- ${t}`).join('\n')}\n`
+    : '';
 
+  const prompt = `You are an expert US ${domain} analyst. Analyze these trending US ${domain} headlines and identify the SINGLE most talked-about, trending American ${domain === 'sports' ? 'athlete/sports personality' : 'celebrity/entertainer'} right now.
+${coveredSection}
 Headlines:
 ${headlines}
 
 Rules:
-- Pick ONLY ONE person who is generating the MOST buzz across these headlines.
+- ALREADY COVERED — DO NOT REPEAT: You MUST explicitly ignore any person or topic that closely matches any title in "ALREADY COVERED — DO NOT REPEAT". Under NO circumstance should you pick someone whose net worth or story was already published recently.
+- Pick ONLY ONE person who is generating the MOST buzz across these headlines and is NOT already covered.
 - The person MUST be a well-known US-based figure.
-- If no clear person emerges, pick the most famous ${domain === 'sports' ? 'US athlete (e.g., LeBron James, Patrick Mahomes, Travis Kelce)' : 'US celebrity (e.g., Taylor Swift, Zendaya, MrBeast, Beyoncé)'}.
+- If no clear person emerges from the headlines, pick a famous US ${domain === 'sports' ? 'athlete' : 'celebrity'} who is completely absent from the "ALREADY COVERED" list.
 - Return ONLY the person's full name as a plain string. No quotes, no explanation, no JSON.
 
-Example output: LeBron James`;
+Example output: Patrick Mahomes`;
 
   try {
     const result = await geminiModel.generateContent(prompt);
@@ -532,27 +654,29 @@ Example output: LeBron James`;
     console.log(`[Curate] Top trending ${domain} person identified: ${personName}`);
     return personName;
   } catch (err) {
-    const fallback = domain === 'sports' ? 'LeBron James' : 'Taylor Swift';
+    const fallback = domain === 'sports' ? 'Patrick Mahomes' : 'Zendaya';
     console.warn(`[Curate] Failed to identify trending ${domain} person (${err.message}). Falling back to: ${fallback}`);
     return fallback;
   }
 }
 
 /**
- * Curates a strict batch of 10 topics following the 4+1+4+1 content mix strategy:
- *   4 Trending US Sports News
- *   1 Sports Person Net Worth/Lifestyle
- *   4 Trending US Entertainment News
- *   1 Celebrity Net Worth/Lifestyle
+ * Curates a strict batch of 5 topics following the content mix strategy:
+ *   2 Trending US Sports News
+ *   2 Trending US Entertainment News
+ *   1 US Celebrity/Athlete Net Worth & Lifestyle
+ * Total: 5 high-quality, non-overlapping articles per run.
+ * @param {Array<string>} recentTitles - Article titles published within the last 24h
  * @returns {Promise<Array<{title: string, link: string, snippet: string, image_url: string, category: string, topicType: string}>>}
  */
-async function curateTenTopicBatch() {
-  console.log('[Curate] Starting 4+1+4+1 US content mix curation...');
+async function curateFiveTopicBatch(recentTitles = []) {
+  console.log('[Curate] Starting 5-article content mix curation (2 Sports + 2 Entertainment + 1 Net Worth)...');
 
   const { sportsFiltered, entFiltered } = await fetchRawUSNewsTrends();
 
-  // ── Extract 4 Sports News topics ──
-  const sportsNews = sportsFiltered.slice(0, 4).map(item => ({
+  // ── Curate 2 Sports News topics with Gemini ──
+  const selectedSports = await curateDomainTopicsWithGemini(sportsFiltered, 'sports', 2, recentTitles);
+  const sportsNews = selectedSports.map(item => ({
     title: item.title || 'Unknown Sports Topic',
     link: item.link || '',
     snippet: item.description || item.content || item.title,
@@ -561,8 +685,9 @@ async function curateTenTopicBatch() {
     topicType: 'news'
   }));
 
-  // ── Extract 4 Entertainment News topics ──
-  const entNews = entFiltered.slice(0, 4).map(item => ({
+  // ── Curate 2 Entertainment News topics with Gemini ──
+  const selectedEnt = await curateDomainTopicsWithGemini(entFiltered, 'entertainment', 2, recentTitles);
+  const entNews = selectedEnt.map(item => ({
     title: item.title || 'Unknown Entertainment Topic',
     link: item.link || '',
     snippet: item.description || item.content || item.title,
@@ -571,48 +696,39 @@ async function curateTenTopicBatch() {
     topicType: 'news'
   }));
 
-  // ── Identify top trending persons via Gemini (parallel) ──
-  const [sportsPersonName, entPersonName] = await Promise.all([
-    identifyTopTrendingPerson(sportsFiltered.slice(0, 10), 'sports'),
-    identifyTopTrendingPerson(entFiltered.slice(0, 10), 'entertainment')
-  ]);
+  // ── Choose domain for 1 Net Worth topic (balanced across runs) ──
+  const pickSportsNW = new Date().getUTCHours() % 2 === 0;
+  const nwDomain = pickSportsNW ? 'sports' : 'entertainment';
+  const nwCandidates = pickSportsNW ? sportsFiltered : entFiltered;
 
-  // ── Create 1 Sports Net Worth topic ──
-  const sportsNetWorth = {
-    title: `${sportsPersonName} Net Worth 2026: Complete Salary, Endorsements & Lifestyle Breakdown`,
+  const trendingPersonName = await identifyTopTrendingPerson(nwCandidates.slice(0, 10), nwDomain, recentTitles);
+
+  const netWorthTopic = {
+    title: `${trendingPersonName} Net Worth 2026: Complete Salary, Earnings & Lifestyle Breakdown`,
     link: '',
-    snippet: `Comprehensive net worth breakdown of ${sportsPersonName} including salary, endorsement deals, car collection, real estate portfolio, business ventures, and complete lifestyle analysis for 2026.`,
-    image_url: sportsFiltered[0]?.image_url || '',
-    category: 'sports',
+    snippet: `Comprehensive net worth breakdown of ${trendingPersonName} including salary, earnings, endorsement deals, real estate portfolio, business ventures, and complete lifestyle analysis for 2026.`,
+    image_url: (pickSportsNW ? sportsFiltered[0]?.image_url : entFiltered[0]?.image_url) || '',
+    category: nwDomain,
     topicType: 'net_worth'
   };
 
-  // ── Create 1 Entertainment Net Worth topic ──
-  const entNetWorth = {
-    title: `${entPersonName} Net Worth 2026: Complete Earnings, Assets & Lifestyle Breakdown`,
-    link: '',
-    snippet: `Comprehensive net worth breakdown of ${entPersonName} including earnings, brand deals, car collection, real estate portfolio, business empire, and complete lifestyle analysis for 2026.`,
-    image_url: entFiltered[0]?.image_url || '',
-    category: 'entertainment',
-    topicType: 'net_worth'
-  };
-
-  // ── Assemble the final 10-topic batch (4+1+4+1) ──
+  // ── Assemble the final 5-topic batch ──
   const batch = [
     ...sportsNews,
-    sportsNetWorth,
     ...entNews,
-    entNetWorth
+    netWorthTopic
   ];
 
   console.log(`[Curate] ✅ Curated ${batch.length} topics:`);
   console.log(`  → ${sportsNews.length} Sports News`);
-  console.log(`  → 1 Sports Net Worth: "${sportsPersonName}"`);
   console.log(`  → ${entNews.length} Entertainment News`);
-  console.log(`  → 1 Entertainment Net Worth: "${entPersonName}"`);
+  console.log(`  → 1 ${nwDomain === 'sports' ? 'Sports' : 'Entertainment'} Net Worth: "${trendingPersonName}"`);
 
   return batch;
 }
+
+// Backward-compatible alias for any external callers
+const curateTenTopicBatch = curateFiveTopicBatch;
 
 /**
  * Deduplicates an array of topic objects by comparing title keywords.
@@ -847,6 +963,13 @@ async function generateArticleFromTopic(item, index) {
       console.log(`  ↳ [Topic ${index}] Scraping source URL via Cheerio...`);
       scraped = await scrapeArticleText(item.link);
       console.log(`  ↳ [Topic ${index}] Scraped ${scraped.wordCount} words (${scraped.status}).`);
+
+      // Source Length Validation: Enforce minimum 200 words to prevent thin content / low-quality spin
+      if (scraped.wordCount < 200) {
+        console.log(`  ↳ [Topic ${index}] Skipped: Insufficient source material (<200 words)`);
+        return null;
+      }
+
       if (scraped.wordCount > 0 && scraped.text) {
         rawText = scraped.text;
       }
@@ -944,17 +1067,20 @@ async function generateArticleFromTopic(item, index) {
 }
 
 /**
- * Fetches combined Sports and Entertainment trends, selects top 10 topics,
+ * Fetches combined Sports and Entertainment trends, selects top 5 topics,
  * and processes them in parallel batches for extreme speed.
  */
 async function fetchAndScrapeTrends() {
   try {
     // 1. Preload global state to avoid redundant API hits for categories/tags
-    console.log("Step 1: Preloading WordPress Taxonomies...");
+    console.log("Step 1: Preloading WordPress Taxonomies & Fetching Recently Published Posts...");
     await preloadWordPressTaxonomies();
 
-    console.log("Step 2: Curating 4+1+4+1 US Content Mix...");
-    const curatedBatch = await curateTenTopicBatch();
+    // Fetch titles of posts published within the last 24 hours to enforce uniqueness
+    const recentTitles = await fetchRecentlyPublishedTitles();
+
+    console.log("Step 2: Curating 5-Article US Content Mix with Uniqueness Guard...");
+    const curatedBatch = await curateFiveTopicBatch(recentTitles);
     
     // Deduplicate news topics (net worth topics are always unique by design)
     const newsTopics = curatedBatch.filter(t => t.topicType === 'news');
@@ -969,10 +1095,10 @@ async function fetchAndScrapeTrends() {
       return;
     }
 
-    console.log(`\n[Info] Starting ultra-fast parallel generation pipeline for ${topTopics.length} topics (4+1+4+1 mix)...\n`);
+    console.log(`\n[Info] Starting parallel generation pipeline for ${topTopics.length} topics (Target: 5 articles/run)...\n`);
     const publishQueue = [];  // Articles that passed validation
     const retryQueue = [];    // { item, index } objects that failed validation
-    const BATCH_SIZE = 5; // Process 5 at a time (half the batch) to balance speed vs API limits
+    const BATCH_SIZE = 5; // Target generation batch size: 5 articles per run
 
     // ══════════════════════════════════════════════════════════════
     // PHASE 1: Generate all articles and sort into publish/retry queues
@@ -1001,9 +1127,13 @@ async function fetchAndScrapeTrends() {
             retryQueue.push({ item: originalItem, index: globalIndex });
           }
         } else {
-          const reason = result.status === 'rejected' ? result.reason?.message : 'returned null';
-          console.warn(`[Batch] Topic ${globalIndex} generation failed (${reason}), adding to retry queue...`);
-          retryQueue.push({ item: originalItem, index: globalIndex });
+          // If result.value === null, it was skipped (e.g., insufficient source material <200 words or missing link)
+          if (result.status === 'rejected') {
+            console.warn(`[Batch] Topic ${globalIndex} generation encountered an unexpected error (${result.reason?.message}), adding to retry queue...`);
+            retryQueue.push({ item: originalItem, index: globalIndex });
+          } else {
+            console.log(`[Batch] Topic ${globalIndex} was skipped during generation (insufficient source or invalid link). Not retrying.`);
+          }
         }
       }
 

@@ -98,6 +98,12 @@ function getHighResImageUrl(url) {
       }
     });
     
+    // Enforce Unsplash/Pexels minimum width 1200px
+    if (parsedUrl.hostname.includes('unsplash.com') || parsedUrl.hostname.includes('pexels.com')) {
+      parsedUrl.searchParams.set('w', '1200');
+      parsedUrl.searchParams.set('q', '80');
+    }
+    
     return parsedUrl.toString();
   } catch (e) {
     // If URL parsing fails, return the cleaned string fallback
@@ -1312,7 +1318,22 @@ async function generateThumbnail(imageUrl, thumbnailText) {
     const ctx = canvas.getContext('2d');
     
     // 1. Full Image Background
-    const image = await loadImage(imgBuffer);
+    let image = await loadImage(imgBuffer);
+    
+    // VALIDATION: Reject images under 1200px width (Google Discover minimum requirement)
+    if (image.width < 1200) {
+      console.warn(`  ↳ [Warning] Fetched image is undersized (${image.width}px). Discover requires 1200px. Switching to default placeholder.`);
+      const wpBaseUrl = process.env.WP_URL ? process.env.WP_URL.replace(/\/$/, '') : '';
+      try {
+        // Fallback to server-hosted placeholder
+        const serverFallback = await axios.get(`${wpBaseUrl}/wp-content/uploads/default-placeholder.jpg`, { responseType: 'arraybuffer', timeout: 10000 });
+        image = await loadImage(Buffer.from(serverFallback.data, 'binary'));
+      } catch (e) {
+        // Ultimate fallback to a reliable Unsplash generic high-res placeholder
+        const publicFallback = await axios.get('https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=1280&q=80&fit=crop', { responseType: 'arraybuffer', timeout: 10000 });
+        image = await loadImage(Buffer.from(publicFallback.data, 'binary'));
+      }
+    }
     
     // Object-fit cover logic for full canvas (1280x720)
     const targetWidth = 1280;

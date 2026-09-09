@@ -42,10 +42,22 @@ async function preloadWordPressTaxonomies() {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' 
     };
 
-    const [catResp, tagResp] = await Promise.all([
-      axios.get(`${wpBaseUrl}/wp-json/wp/v2/categories?per_page=100&_nocache=${Date.now()}`, { headers: getHeaders }),
-      axios.get(`${wpBaseUrl}/wp-json/wp/v2/tags?per_page=100&_nocache=${Date.now()}`, { headers: getHeaders })
-    ]);
+    let catResp, tagResp;
+    let attempts = 0;
+    while (attempts < 3) {
+      try {
+        [catResp, tagResp] = await Promise.all([
+          axios.get(`${wpBaseUrl}/wp-json/wp/v2/categories?per_page=100&_nocache=${Date.now()}`, { headers: getHeaders, timeout: 15000 }),
+          axios.get(`${wpBaseUrl}/wp-json/wp/v2/tags?per_page=100&_nocache=${Date.now()}`, { headers: getHeaders, timeout: 15000 })
+        ]);
+        break;
+      } catch (e) {
+        attempts++;
+        if (attempts >= 3) throw e;
+        console.warn(`[Warning] Taxonomies fetch failed (Attempt ${attempts}/3). Retrying in 3s... Error: ${e.message}`);
+        await delay(3000);
+      }
+    }
 
     const categories = catResp.data || [];
     categories.forEach(cat => wpCategoriesMap.set(cat.name.toLowerCase(), cat.id));
@@ -532,10 +544,22 @@ async function fetchRecentlyPublishedTitles() {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     };
 
-    const resp = await axios.get(
-      `${wpBaseUrl}/wp-json/wp/v2/posts?after=${encodeURIComponent(afterDate)}&per_page=100&_fields=id,title,slug,date&_nocache=${Date.now()}`,
-      { headers: getHeaders, timeout: 15000 }
-    );
+    let resp;
+    let attempts = 0;
+    while (attempts < 3) {
+      try {
+        resp = await axios.get(
+          `${wpBaseUrl}/wp-json/wp/v2/posts?after=${encodeURIComponent(afterDate)}&per_page=100&_fields=id,title,slug,date&_nocache=${Date.now()}`,
+          { headers: getHeaders, timeout: 15000 }
+        );
+        break;
+      } catch (e) {
+        attempts++;
+        if (attempts >= 3) throw e;
+        console.warn(`[Warning] Recent posts fetch failed (Attempt ${attempts}/3). Retrying in 3s... Error: ${e.message}`);
+        await delay(3000);
+      }
+    }
 
     const posts = Array.isArray(resp.data) ? resp.data : [];
     const titles = posts.map(p => {

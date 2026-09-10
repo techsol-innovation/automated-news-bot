@@ -826,6 +826,8 @@ async function broadcastToTelegram(article, postUrl) {
     
     const messageText = `🔥 <b>${article.seoTitle || article.title}</b>\n\n${excerptHook}\n\n👉 <a href="${postUrl}">Read the full article here</a>`;
 
+    console.log(`  ↳ [Telegram Debug] Attempting to post to Telegram channel: ${process.env.TELEGRAM_CHANNEL_ID}`);
+    
     await axios.post(telegramApiUrl, {
       chat_id: process.env.TELEGRAM_CHANNEL_ID,
       text: messageText,
@@ -834,7 +836,8 @@ async function broadcastToTelegram(article, postUrl) {
     
     console.log(`  ↳ [Telegram] ✅ Successfully broadcasted to channel.`);
   } catch (err) {
-    console.error(`  ↳ [Telegram Error] Failed to broadcast: ${err.message}`);
+    const apiErr = err.response ? JSON.stringify(err.response.data) : err.message;
+    console.error(`  ↳ [Telegram API Error] Failed to broadcast: ${apiErr}`);
   }
 }
 

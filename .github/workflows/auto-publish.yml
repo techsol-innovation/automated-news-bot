@@ -27,6 +27,8 @@ jobs:
           WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD || vars.WP_APP_PASSWORD }}
           WP_URL: ${{ secrets.WP_URL || vars.WP_URL }}
           NEWSDATA_API_KEY: ${{ secrets.NEWSDATA_API_KEY || vars.NEWSDATA_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || vars.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID || vars.TELEGRAM_CHANNEL_ID }}
         run: node index.js
 
       - name: Ping IndexNow for Published URLs

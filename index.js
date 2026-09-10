@@ -6,10 +6,24 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { createCanvas, loadImage } = require('canvas');
 const FormData = require('form-data');
 const DDG = require('duck-duck-scrape');
+const { TwitterApi } = require('twitter-api-v2');
 
 // Initialize Gemini client and model
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 const geminiModel = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
+
+// Initialize Twitter client
+let twitterClient;
+if (process.env.TWITTER_API_KEY && process.env.TWITTER_API_SECRET && process.env.TWITTER_ACCESS_TOKEN && process.env.TWITTER_ACCESS_SECRET) {
+  twitterClient = new TwitterApi({
+    appKey: process.env.TWITTER_API_KEY,
+    appSecret: process.env.TWITTER_API_SECRET,
+    accessToken: process.env.TWITTER_ACCESS_TOKEN,
+    accessSecret: process.env.TWITTER_ACCESS_SECRET,
+  });
+} else {
+  console.warn('[Warning] Missing Twitter API credentials. Twitter syndication will be disabled.');
+}
 
 // Category ID mapping for WordPress REST API
 const CATEGORY_MAP = {
@@ -842,6 +856,33 @@ async function broadcastToTelegram(article, postUrl) {
 }
 
 /**
+ * Broadcasts newly published articles to Twitter/X to build social signals/backlinks.
+ */
+async function broadcastToTwitter(title, articleUrl) {
+  if (!twitterClient) {
+    console.warn('  ↳ [Twitter] Skipped: Client not initialized (Missing credentials)');
+    return;
+  }
+
+  try {
+    let safeTitle = title;
+    if (safeTitle.length > 200) {
+      safeTitle = safeTitle.substring(0, 197) + '...';
+    }
+    const tweetText = `🚨 ${safeTitle}\n\n#Entertainment #News\n\n👉 ${articleUrl}`;
+    
+    console.log(`  ↳ [Twitter Debug] Attempting to tweet: "${safeTitle}"`);
+    
+    await twitterClient.v2.tweet(tweetText);
+    
+    console.log(`  ↳ [Twitter] ✅ Successfully tweeted article.`);
+  } catch (err) {
+    const apiErr = err.response ? JSON.stringify(err.response.data) : err.message;
+    console.error(`  ↳ [Twitter API Error] Failed to tweet: ${apiErr}`);
+  }
+}
+
+/**
  * Pings IndexNow API to notify search engines about a newly published URL.
  * Uses Bing's IndexNow endpoint (free, no API key required for basic pings).
  * @param {string} postUrl - The full live URL of the published post
@@ -1216,6 +1257,7 @@ async function fetchAndScrapeTrends() {
         if (wpResponse && wpResponse.link) {
           await pingIndexNow(wpResponse.link);
           await broadcastToTelegram(article, wpResponse.link);
+          await broadcastToTwitter(article.title, wpResponse.link);
           fs.appendFileSync('latest_url.txt', wpResponse.link + '\n');
         }
       } catch (wpErr) {
@@ -1251,6 +1293,7 @@ async function fetchAndScrapeTrends() {
               if (wpResponse && wpResponse.link) {
                 await pingIndexNow(wpResponse.link);
                 await broadcastToTelegram(article, wpResponse.link);
+                await broadcastToTwitter(article.title, wpResponse.link);
                 fs.appendFileSync('latest_url.txt', wpResponse.link + '\n');
               }
             } catch (wpErr) {

@@ -811,6 +811,34 @@ function deduplicateTopics(topics) {
 }
 
 /**
+ * Broadcasts newly published articles to Telegram to build social signals/backlinks.
+ */
+async function broadcastToTelegram(article, postUrl) {
+  if (!process.env.TELEGRAM_BOT_TOKEN || !process.env.TELEGRAM_CHANNEL_ID) {
+    console.warn('  ↳ [Telegram] Skipped: Missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHANNEL_ID');
+    return;
+  }
+
+  try {
+    const telegramApiUrl = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`;
+    
+    const excerptHook = article.excerpt ? article.excerpt.replace(/<[^>]+>/g, '') : article.metaDescription || '';
+    
+    const messageText = `🔥 <b>${article.seoTitle || article.title}</b>\n\n${excerptHook}\n\n👉 <a href="${postUrl}">Read the full article here</a>`;
+
+    await axios.post(telegramApiUrl, {
+      chat_id: process.env.TELEGRAM_CHANNEL_ID,
+      text: messageText,
+      parse_mode: 'HTML'
+    });
+    
+    console.log(`  ↳ [Telegram] ✅ Successfully broadcasted to channel.`);
+  } catch (err) {
+    console.error(`  ↳ [Telegram Error] Failed to broadcast: ${err.message}`);
+  }
+}
+
+/**
  * Pings IndexNow API to notify search engines about a newly published URL.
  * Uses Bing's IndexNow endpoint (free, no API key required for basic pings).
  * @param {string} postUrl - The full live URL of the published post
@@ -1184,6 +1212,7 @@ async function fetchAndScrapeTrends() {
         // Auto-ping IndexNow for instant search engine indexing
         if (wpResponse && wpResponse.link) {
           await pingIndexNow(wpResponse.link);
+          await broadcastToTelegram(article, wpResponse.link);
           fs.appendFileSync('latest_url.txt', wpResponse.link + '\n');
         }
       } catch (wpErr) {
@@ -1218,6 +1247,7 @@ async function fetchAndScrapeTrends() {
               publishQueue.push(article);
               if (wpResponse && wpResponse.link) {
                 await pingIndexNow(wpResponse.link);
+                await broadcastToTelegram(article, wpResponse.link);
                 fs.appendFileSync('latest_url.txt', wpResponse.link + '\n');
               }
             } catch (wpErr) {

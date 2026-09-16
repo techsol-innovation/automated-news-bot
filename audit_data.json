@@ -1,0 +1,48 @@
+{
+  "auditTimestamp": "2026-09-16T03:31:28.475Z",
+  "siteUrl": "https://brightcelebrity.com/",
+  "analyzedPostCount": 5,
+  "gscStatus": "success",
+  "auditResults": [
+    {
+      "postId": 12589,
+      "currentTitle": "Taylor Swift Emmy Appearance 2026: The Truth Revealed",
+      "postLink": "https://brightcelebrity.com/taylor-swift-emmy-appearance-2026/",
+      "seoIssue": "The phrase 'Truth Revealed' is a low-CTR cliché; the title fails to front-load the 'NFL' vs 'Emmy' conflict which is the primary search driver.",
+      "suggestedTitle": "Taylor Swift 2026 Emmy Sketch: Why She Skipped for the NFL",
+      "suggestedFix": "Front-load the Emmy/NFL conflict. Add VideoObject schema to the pre-taped sketch mention to win a video rich snippet on mobile SERPs."
+    },
+    {
+      "postId": 12588,
+      "currentTitle": "Myles Kennedy AI Songwriting Stance 2024: Music Industry Views",
+      "postLink": "https://brightcelebrity.com/myles-kennedy-ai-songwriting/",
+      "seoIssue": "Critical date mismatch; title mentions 2024 while site context is 2026, creating a negative 'freshness' signal. 'Stance' is a weak, passive noun.",
+      "suggestedTitle": "Myles Kennedy Slams AI Music: Why It’s 'Cheating' in 2026",
+      "suggestedFix": "Update title and meta description to 2026. Use the power word 'Slams' and include the direct quote 'Cheating' to increase curiosity-gap CTR."
+    },
+    {
+      "postId": 12586,
+      "currentTitle": "Doug Leier: The future of fishing in North Dakota 2026",
+      "postLink": "https://brightcelebrity.com/doug-leier-future-fishing-north-dakota/",
+      "seoIssue": "Title is too academic and lacks a 'How-to' or numerical hook for local anglers. Missing key entity 'Walleye' in the headline.",
+      "suggestedTitle": "12 Million Walleye! Doug Leier’s 2026 ND Fishing Forecast",
+      "suggestedFix": "Lead with the '12 Million' figure to trigger numerical bias. Change 'Future' to 'Forecast' to align with user intent for seasonal planning."
+    },
+    {
+      "postId": 12583,
+      "currentTitle": "Pittsburgh International Jazz Festival 2025: Full Lineup",
+      "postLink": "https://brightcelebrity.com/pittsburgh-international-jazz-festival/",
+      "seoIssue": "Title is outdated (2025) for a 2026 audience. 'Full Lineup' is common; lacks a unique value proposition like 'Jazz Train' details.",
+      "suggestedTitle": "Pittsburgh Jazz Festival 2026: Full Lineup & Jazz Train Guide",
+      "suggestedFix": "Correct year to 2026. Implement Event Schema (JSON-LD) for the Sept 17-20 dates to capture the Google Events Knowledge Graph slot."
+    },
+    {
+      "postId": 12582,
+      "currentTitle": "VTech Toy-Powered Music Campaign 2026: The Creative Strategy",
+      "postLink": "https://brightcelebrity.com/vtech-toy-powered-music/",
+      "seoIssue": "B2B jargon ('Creative Strategy') kills interest for a celebrity/entertainment site. Lacks consumer-facing 'New Toy' or 'Review' intent.",
+      "suggestedTitle": "VTech’s New 2026 Music Toys: 5 Features Parents Will Love",
+      "suggestedFix": "Pivot H1 to listicle format (5 Features). Add Product Schema and high-res image galleries of the 'Kidi Star Rockstar Guitar' to improve Discover visibility."
+    }
+  ]
+}

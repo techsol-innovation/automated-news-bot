@@ -1,48 +1,48 @@
 {
-  "auditTimestamp": "2026-09-16T03:31:28.475Z",
+  "auditTimestamp": "2026-09-19T03:19:09.681Z",
   "siteUrl": "https://brightcelebrity.com/",
   "analyzedPostCount": 5,
   "gscStatus": "success",
   "auditResults": [
     {
-      "postId": 12589,
-      "currentTitle": "Taylor Swift Emmy Appearance 2026: The Truth Revealed",
-      "postLink": "https://brightcelebrity.com/taylor-swift-emmy-appearance-2026/",
-      "seoIssue": "The phrase 'Truth Revealed' is a low-CTR cliché; the title fails to front-load the 'NFL' vs 'Emmy' conflict which is the primary search driver.",
-      "suggestedTitle": "Taylor Swift 2026 Emmy Sketch: Why She Skipped for the NFL",
-      "suggestedFix": "Front-load the Emmy/NFL conflict. Add VideoObject schema to the pre-taped sketch mention to win a video rich snippet on mobile SERPs."
+      "postId": 13027,
+      "currentTitle": "Duncan Sheik Dead at 56: Broadway Legend Dies in 2025",
+      "postLink": "https://brightcelebrity.com/duncan-sheik-dead/",
+      "seoIssue": "Chronological conflict (published in 2026 claiming death in 2025) severely harms E-E-A-T and news eligibility; fails to target the high-volume 'cause of death' search intent.",
+      "suggestedTitle": "Duncan Sheik Cause of Death: Broadway Legend Dies at 56",
+      "suggestedFix": "Correct the chronological discrepancies throughout the text to align with factual timeline standards, front-load 'Cause of Death' to capture high-volume query intent, and implement structured Person and Obituary schema."
     },
     {
-      "postId": 12588,
-      "currentTitle": "Myles Kennedy AI Songwriting Stance 2024: Music Industry Views",
-      "postLink": "https://brightcelebrity.com/myles-kennedy-ai-songwriting/",
-      "seoIssue": "Critical date mismatch; title mentions 2024 while site context is 2026, creating a negative 'freshness' signal. 'Stance' is a weak, passive noun.",
-      "suggestedTitle": "Myles Kennedy Slams AI Music: Why It’s 'Cheating' in 2026",
-      "suggestedFix": "Update title and meta description to 2026. Use the power word 'Slams' and include the direct quote 'Cheating' to increase curiosity-gap CTR."
+      "postId": 13025,
+      "currentTitle": "Miami vs Wake Forest 2026: Live Stream and Game Info",
+      "postLink": "https://brightcelebrity.com/miami-vs-wake-forest-2026/",
+      "seoIssue": "Title lacks critical user intent indicators such as kick-off time, broadcasting channel, or streaming options, leading to low click-through rates on sports queries.",
+      "suggestedTitle": "Miami vs Wake Forest 2026: How to Watch, Time & Channel",
+      "suggestedFix": "Optimize title with high-CTR action words like 'How to Watch' and 'Channel'. Embed a prominent info table at the top containing kickoff time, TV network, and betting odds, and apply Event structured data."
     },
     {
-      "postId": 12586,
-      "currentTitle": "Doug Leier: The future of fishing in North Dakota 2026",
-      "postLink": "https://brightcelebrity.com/doug-leier-future-fishing-north-dakota/",
-      "seoIssue": "Title is too academic and lacks a 'How-to' or numerical hook for local anglers. Missing key entity 'Walleye' in the headline.",
-      "suggestedTitle": "12 Million Walleye! Doug Leier’s 2026 ND Fishing Forecast",
-      "suggestedFix": "Lead with the '12 Million' figure to trigger numerical bias. Change 'Future' to 'Forecast' to align with user intent for seasonal planning."
+      "postId": 13023,
+      "currentTitle": "Leeds form not a coincidence 2026: Farke Impact Analysis",
+      "postLink": "https://brightcelebrity.com/leeds-form-not-a-coincidence/",
+      "seoIssue": "Awkward, non-vernacular phrasing ('form not a coincidence') fails to align with natural search queries regarding Leeds United and Daniel Farke's management.",
+      "suggestedTitle": "Why Leeds United's 2026 Form Is No Coincidence: Tactics",
+      "suggestedFix": "Rewrite title to mirror natural search language. Target 'Leeds United' and 'Daniel Farke' as primary entities, structure tactical takeaways into H2/H3 elements, and optimize the meta description to focus on EFL/Premier League standings."
     },
     {
-      "postId": 12583,
-      "currentTitle": "Pittsburgh International Jazz Festival 2025: Full Lineup",
-      "postLink": "https://brightcelebrity.com/pittsburgh-international-jazz-festival/",
-      "seoIssue": "Title is outdated (2025) for a 2026 audience. 'Full Lineup' is common; lacks a unique value proposition like 'Jazz Train' details.",
-      "suggestedTitle": "Pittsburgh Jazz Festival 2026: Full Lineup & Jazz Train Guide",
-      "suggestedFix": "Correct year to 2026. Implement Event Schema (JSON-LD) for the Sept 17-20 dates to capture the Google Events Knowledge Graph slot."
+      "postId": 13022,
+      "currentTitle": "Steveson On Jones Title Run: UFC 331 Fight News",
+      "postLink": "https://brightcelebrity.com/gable-steveson-on-jones-title-run/",
+      "seoIssue": "Fails to utilize the full, high-authority entity names 'Gable Steveson' and 'Jon Jones' in the title; lacks a compelling narrative hook regarding their mentor-protege dynamic.",
+      "suggestedTitle": "Why Gable Steveson Refuses to Fight Jon Jones: UFC 331",
+      "suggestedFix": "Update title to feature full entity names and leverage the conflict angle ('refuses to fight') to boost click-through rates. Add FAQ Schema addressing Gable Steveson's UFC career path and his relationship with Jon Jones."
     },
     {
-      "postId": 12582,
-      "currentTitle": "VTech Toy-Powered Music Campaign 2026: The Creative Strategy",
-      "postLink": "https://brightcelebrity.com/vtech-toy-powered-music/",
-      "seoIssue": "B2B jargon ('Creative Strategy') kills interest for a celebrity/entertainment site. Lacks consumer-facing 'New Toy' or 'Review' intent.",
-      "suggestedTitle": "VTech’s New 2026 Music Toys: 5 Features Parents Will Love",
-      "suggestedFix": "Pivot H1 to listicle format (5 Features). Add Product Schema and high-res image galleries of the 'Kidi Star Rockstar Guitar' to improve Discover visibility."
+      "postId": 13019,
+      "currentTitle": "AP Sports SummaryBrief 2026: Top Highlights & Results",
+      "postLink": "https://brightcelebrity.com/ap-sports-summarybrief-2026/",
+      "seoIssue": "Title uses low-search-volume wire terminology ('AP Sports SummaryBrief') instead of naming highly searched entities like Josh Allen, the Dodgers, or Angel Reese.",
+      "suggestedTitle": "Josh Allen 5-TDs & Angel Reese Records: 2026 Sports Daily",
+      "suggestedFix": "Pivot from generic, syndicated-style headlines to entity-focused, highly clickable news hooks. Incorporate trending sport star names into H2 headings, add descriptive alt text to media assets, and apply NewsArticle structured data to optimize for Google Discover."
     }
   ]
 }

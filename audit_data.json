@@ -1,48 +1,48 @@
 {
-  "auditTimestamp": "2026-09-19T03:19:09.681Z",
+  "auditTimestamp": "2026-09-22T03:30:17.763Z",
   "siteUrl": "https://brightcelebrity.com/",
   "analyzedPostCount": 5,
   "gscStatus": "success",
   "auditResults": [
     {
-      "postId": 13027,
-      "currentTitle": "Duncan Sheik Dead at 56: Broadway Legend Dies in 2025",
-      "postLink": "https://brightcelebrity.com/duncan-sheik-dead/",
-      "seoIssue": "Chronological conflict (published in 2026 claiming death in 2025) severely harms E-E-A-T and news eligibility; fails to target the high-volume 'cause of death' search intent.",
-      "suggestedTitle": "Duncan Sheik Cause of Death: Broadway Legend Dies at 56",
-      "suggestedFix": "Correct the chronological discrepancies throughout the text to align with factual timeline standards, front-load 'Cause of Death' to capture high-volume query intent, and implement structured Person and Obituary schema."
+      "postId": 13441,
+      "currentTitle": "Georgia Poured Salt In Arkansas Wound: NIL Practice Drama",
+      "postLink": "https://brightcelebrity.com/georgia-poured-salt-in-arkansas-wound/",
+      "seoIssue": "Metaphorical title obscures search intent and lacks numerical listicle appeal; 'Poured Salt' is a low-volume idiom.",
+      "suggestedTitle": "Georgia vs Arkansas NIL Drama: 5 Reasons for the Blowout",
+      "suggestedFix": "Front-load 'Georgia vs Arkansas' and 'NIL' keywords; use a listicle format (5 Reasons) to increase CTR in Google News."
     },
     {
-      "postId": 13025,
-      "currentTitle": "Miami vs Wake Forest 2026: Live Stream and Game Info",
-      "postLink": "https://brightcelebrity.com/miami-vs-wake-forest-2026/",
-      "seoIssue": "Title lacks critical user intent indicators such as kick-off time, broadcasting channel, or streaming options, leading to low click-through rates on sports queries.",
-      "suggestedTitle": "Miami vs Wake Forest 2026: How to Watch, Time & Channel",
-      "suggestedFix": "Optimize title with high-CTR action words like 'How to Watch' and 'Channel'. Embed a prominent info table at the top containing kickoff time, TV network, and betting odds, and apply Event structured data."
+      "postId": 13438,
+      "currentTitle": "Presley Gerber Death: 2026 Club of 27 Theory Analysis",
+      "postLink": "https://brightcelebrity.com/presley-gerber-death/",
+      "seoIssue": "Title is too clinical ('Theory Analysis'); lacks high-urgency power words for breaking celebrity news.",
+      "suggestedTitle": "Presley Gerber Death at 27: The Shocking 2026 Club of 27 Truth",
+      "suggestedFix": "Inject 'Shocking' and 'Truth' power words; ensure 'Presley Gerber Death' remains at the front of the H1 and Meta Title."
     },
     {
-      "postId": 13023,
-      "currentTitle": "Leeds form not a coincidence 2026: Farke Impact Analysis",
-      "postLink": "https://brightcelebrity.com/leeds-form-not-a-coincidence/",
-      "seoIssue": "Awkward, non-vernacular phrasing ('form not a coincidence') fails to align with natural search queries regarding Leeds United and Daniel Farke's management.",
-      "suggestedTitle": "Why Leeds United's 2026 Form Is No Coincidence: Tactics",
-      "suggestedFix": "Rewrite title to mirror natural search language. Target 'Leeds United' and 'Daniel Farke' as primary entities, structure tactical takeaways into H2/H3 elements, and optimize the meta description to focus on EFL/Premier League standings."
+      "postId": 13435,
+      "currentTitle": "Mike Tomlin Studio Role 2024: No Booth Plans Ahead",
+      "postLink": "https://brightcelebrity.com/mike-tomlin-studio-role-2024/",
+      "seoIssue": "Date discrepancy (2024 vs 2026) causes user distrust; passive phrasing 'No Booth Plans' kills search intent.",
+      "suggestedTitle": "Mike Tomlin NBC Role 2026: Why He Refused the NFL Booth",
+      "suggestedFix": "Update year to 2026; use 'Why' hook to capture searchers investigating his career change; add FAQ schema for 'NBC Contract'."
     },
     {
-      "postId": 13022,
-      "currentTitle": "Steveson On Jones Title Run: UFC 331 Fight News",
-      "postLink": "https://brightcelebrity.com/gable-steveson-on-jones-title-run/",
-      "seoIssue": "Fails to utilize the full, high-authority entity names 'Gable Steveson' and 'Jon Jones' in the title; lacks a compelling narrative hook regarding their mentor-protege dynamic.",
-      "suggestedTitle": "Why Gable Steveson Refuses to Fight Jon Jones: UFC 331",
-      "suggestedFix": "Update title to feature full entity names and leverage the conflict angle ('refuses to fight') to boost click-through rates. Add FAQ Schema addressing Gable Steveson's UFC career path and his relationship with Jon Jones."
+      "postId": 13432,
+      "currentTitle": "Donatella Versace Best Red Carpet Moments 2026 Archive",
+      "postLink": "https://brightcelebrity.com/donatella-versace-best-red-carpet-moments/",
+      "seoIssue": "'Archive' is a low-click term; title lacks a specific number to dominate competitive fashion listicle SERPs.",
+      "suggestedTitle": "15 Unforgettable Donatella Versace Red Carpet Moments",
+      "suggestedFix": "Change 'Archive' to 'Unforgettable' and add a count (15); optimize image ALT tags with 'Donatella Versace 2026' entities."
     },
     {
-      "postId": 13019,
-      "currentTitle": "AP Sports SummaryBrief 2026: Top Highlights & Results",
-      "postLink": "https://brightcelebrity.com/ap-sports-summarybrief-2026/",
-      "seoIssue": "Title uses low-search-volume wire terminology ('AP Sports SummaryBrief') instead of naming highly searched entities like Josh Allen, the Dodgers, or Angel Reese.",
-      "suggestedTitle": "Josh Allen 5-TDs & Angel Reese Records: 2026 Sports Daily",
-      "suggestedFix": "Pivot from generic, syndicated-style headlines to entity-focused, highly clickable news hooks. Incorporate trending sport star names into H2 headings, add descriptive alt text to media assets, and apply NewsArticle structured data to optimize for Google Discover."
+      "postId": 13430,
+      "currentTitle": "Disney Engineering Careers: Disneyland Anaheim Story",
+      "postLink": "https://brightcelebrity.com/disney-engineering-careers/",
+      "seoIssue": "Weak 'Story' hook fails to match career-seeker intent; title doesn't promise a benefit or guide.",
+      "suggestedTitle": "Disney Engineering Careers: 5 Tips to Get Hired at Disneyland",
+      "suggestedFix": "Pivot to a 'How-to' guide format; target 'Get Hired' intent; add JobPosting schema elements to relevant subheadings."
     }
   ]
 }

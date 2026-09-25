@@ -1,48 +1,44 @@
 {
-  "auditTimestamp": "2026-09-22T03:30:17.763Z",
+  "auditTimestamp": "2026-09-25T03:37:48.577Z",
   "siteUrl": "https://brightcelebrity.com/",
   "analyzedPostCount": 5,
   "gscStatus": "success",
   "auditResults": [
     {
-      "postId": 13441,
-      "currentTitle": "Georgia Poured Salt In Arkansas Wound: NIL Practice Drama",
-      "postLink": "https://brightcelebrity.com/georgia-poured-salt-in-arkansas-wound/",
-      "seoIssue": "Metaphorical title obscures search intent and lacks numerical listicle appeal; 'Poured Salt' is a low-volume idiom.",
-      "suggestedTitle": "Georgia vs Arkansas NIL Drama: 5 Reasons for the Blowout",
-      "suggestedFix": "Front-load 'Georgia vs Arkansas' and 'NIL' keywords; use a listicle format (5 Reasons) to increase CTR in Google News."
+      "postId": 13828,
+      "currentTitle": "Macklemore Free Palestine Tour 2026: Dates & Controversy",
+      "postLink": "https://brightcelebrity.com/macklemore-free-palestine-tour/",
+      "seoIssue": "Title lacks emotional trigger and urgency; passive structure fails to capture high-intent 'Macklemore tour' searchers.",
+      "suggestedTitle": "Macklemore Free Palestine Tour 2026: 7 Facts & Tour Dates",
+      "suggestedFix": "Update H1 to include '7 Facts' to appeal to listicle-seeking searchers. Add an FAQ schema specifically answering the 'Why was he dropped?' query to capture Featured Snippets."
     },
     {
-      "postId": 13438,
-      "currentTitle": "Presley Gerber Death: 2026 Club of 27 Theory Analysis",
-      "postLink": "https://brightcelebrity.com/presley-gerber-death/",
-      "seoIssue": "Title is too clinical ('Theory Analysis'); lacks high-urgency power words for breaking celebrity news.",
-      "suggestedTitle": "Presley Gerber Death at 27: The Shocking 2026 Club of 27 Truth",
-      "suggestedFix": "Inject 'Shocking' and 'Truth' power words; ensure 'Presley Gerber Death' remains at the front of the H1 and Meta Title."
+      "postId": 13826,
+      "currentTitle": "Coleen Nolan Matching Tattoo 2026: Romance Details Revealed",
+      "seoIssue": "Title is cluttered; missing a power word that drives curiosity and doesn't explicitly highlight the celebrity status as a 'exclusive'.",
+      "suggestedTitle": "Coleen Nolan’s Secret Tattoo: 5 Shocking Romance Details",
+      "suggestedFix": "Rewrite the meta description to emphasize the 'exclusive' nature of the story. Ensure the H2s address the age gap directly with high-volume keywords like 'Coleen Nolan boyfriend'."
     },
     {
-      "postId": 13435,
-      "currentTitle": "Mike Tomlin Studio Role 2024: No Booth Plans Ahead",
-      "postLink": "https://brightcelebrity.com/mike-tomlin-studio-role-2024/",
-      "seoIssue": "Date discrepancy (2024 vs 2026) causes user distrust; passive phrasing 'No Booth Plans' kills search intent.",
-      "suggestedTitle": "Mike Tomlin NBC Role 2026: Why He Refused the NFL Booth",
-      "suggestedFix": "Update year to 2026; use 'Why' hook to capture searchers investigating his career change; add FAQ schema for 'NBC Contract'."
+      "postId": 13824,
+      "currentTitle": "Colston Loveland 2026 Stats: Chicago Bears Insider Analysis",
+      "seoIssue": "Weak CTR appeal; 'Insider Analysis' is too dry. The article fails to address the 'is he a bust?' search intent of fantasy football managers.",
+      "suggestedTitle": "Colston Loveland 2026 Stats: 3 Reasons For The Slump",
+      "suggestedFix": "Shift the focus to the 'bust vs. breakout' narrative. Add a table comparing his 2025 vs 2026 stats to increase page dwell time and signal expertise to Google."
     },
     {
-      "postId": 13432,
-      "currentTitle": "Donatella Versace Best Red Carpet Moments 2026 Archive",
-      "postLink": "https://brightcelebrity.com/donatella-versace-best-red-carpet-moments/",
-      "seoIssue": "'Archive' is a low-click term; title lacks a specific number to dominate competitive fashion listicle SERPs.",
-      "suggestedTitle": "15 Unforgettable Donatella Versace Red Carpet Moments",
-      "suggestedFix": "Change 'Archive' to 'Unforgettable' and add a count (15); optimize image ALT tags with 'Donatella Versace 2026' entities."
+      "postId": 13822,
+      "currentTitle": "Virtual Reali-Tea Awards 2026: Philo Exclusive Stream Date",
+      "seoIssue": "Title is overly descriptive and lacks a 'click-me' hook. It misses the benefit of watching (e.g., how to stream for free/where to watch).",
+      "suggestedTitle": "Virtual Reali-Tea Awards 2026: How To Watch (Full Guide)",
+      "suggestedFix": "Include a step-by-step 'How to Watch' section to capture 'How to' intent. Link the Philo mention to an affiliate link with 'disclosure' to improve E-E-A-T signals."
     },
     {
-      "postId": 13430,
-      "currentTitle": "Disney Engineering Careers: Disneyland Anaheim Story",
-      "postLink": "https://brightcelebrity.com/disney-engineering-careers/",
-      "seoIssue": "Weak 'Story' hook fails to match career-seeker intent; title doesn't promise a benefit or guide.",
-      "suggestedTitle": "Disney Engineering Careers: 5 Tips to Get Hired at Disneyland",
-      "suggestedFix": "Pivot to a 'How-to' guide format; target 'Get Hired' intent; add JobPosting schema elements to relevant subheadings."
+      "postId": 13820,
+      "currentTitle": "NFL Rio Game 2024: Maracana Stadium History Revealed",
+      "seoIssue": "Title confusion: Article claims 2024 but content date is 2026. This creates a massive search intent mismatch and negative user experience signal.",
+      "suggestedTitle": "NFL Brazil 2026: 5 Historic Facts About Maracana Stadium",
+      "suggestedFix": "Immediately audit content to ensure dates match the current year (2026). Update the title to reflect the present, not past events, to avoid high bounce rates."
     }
   ]
 }

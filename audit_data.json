@@ -1,44 +1,48 @@
 {
-  "auditTimestamp": "2026-09-25T03:37:48.577Z",
+  "auditTimestamp": "2026-09-28T03:53:53.010Z",
   "siteUrl": "https://brightcelebrity.com/",
   "analyzedPostCount": 5,
   "gscStatus": "success",
   "auditResults": [
     {
-      "postId": 13828,
-      "currentTitle": "Macklemore Free Palestine Tour 2026: Dates & Controversy",
-      "postLink": "https://brightcelebrity.com/macklemore-free-palestine-tour/",
-      "seoIssue": "Title lacks emotional trigger and urgency; passive structure fails to capture high-intent 'Macklemore tour' searchers.",
-      "suggestedTitle": "Macklemore Free Palestine Tour 2026: 7 Facts & Tour Dates",
-      "suggestedFix": "Update H1 to include '7 Facts' to appeal to listicle-seeking searchers. Add an FAQ schema specifically answering the 'Why was he dropped?' query to capture Featured Snippets."
+      "postId": 14286,
+      "currentTitle": "Anna Nicole Smith Impact: Sandra Taylor Life Story 2025",
+      "postLink": "https://brightcelebrity.com/anna-nicole-smith-impact/",
+      "seoIssue": "Weak entity hierarchy; 'Impact' is a low-intent keyword. Lacks a curiosity gap or emotional hook for celebrity enthusiasts.",
+      "suggestedTitle": "Sandra Taylor & Anna Nicole: 7 Secrets of Their 90s Legacy",
+      "suggestedFix": "Refocus the H1 on the relationship between the two models. Add 'Playboy' and '90s Modeling' entities to the meta description and intro to capture niche nostalgia traffic."
     },
     {
-      "postId": 13826,
-      "currentTitle": "Coleen Nolan Matching Tattoo 2026: Romance Details Revealed",
-      "seoIssue": "Title is cluttered; missing a power word that drives curiosity and doesn't explicitly highlight the celebrity status as a 'exclusive'.",
-      "suggestedTitle": "Coleen Nolan’s Secret Tattoo: 5 Shocking Romance Details",
-      "suggestedFix": "Rewrite the meta description to emphasize the 'exclusive' nature of the story. Ensure the H2s address the age gap directly with high-volume keywords like 'Coleen Nolan boyfriend'."
+      "postId": 14284,
+      "currentTitle": "David Pastrnak Bruins Captain 2026: The Legacy Continues",
+      "postLink": "https://brightcelebrity.com/david-pastrnak-bruins-captain/",
+      "seoIssue": "Passive phrasing and dry descriptive title. Fails to address the fans' 'What happens next' sentiment regarding leadership.",
+      "suggestedTitle": "Pastrnak Bruins Captain: 5 Reasons He’s the Perfect Leader",
+      "suggestedFix": "Front-load 'Pastrnak' and 'Bruins'. Insert a comparison table of historical Bruins captains to improve E-E-A-T and increase time-on-page."
     },
     {
-      "postId": 13824,
-      "currentTitle": "Colston Loveland 2026 Stats: Chicago Bears Insider Analysis",
-      "seoIssue": "Weak CTR appeal; 'Insider Analysis' is too dry. The article fails to address the 'is he a bust?' search intent of fantasy football managers.",
-      "suggestedTitle": "Colston Loveland 2026 Stats: 3 Reasons For The Slump",
-      "suggestedFix": "Shift the focus to the 'bust vs. breakout' narrative. Add a table comparing his 2025 vs 2026 stats to increase page dwell time and signal expertise to Google."
+      "postId": 14282,
+      "currentTitle": "Mizzou Football Loss 2026: Passing Game Struggles Recap",
+      "postLink": "https://brightcelebrity.com/mizzou-football-loss-2026/",
+      "seoIssue": "Missing the opponent name which is a primary search entity. Title is too academic and lacks the urgency of sports reporting.",
+      "suggestedTitle": "Mizzou vs Mississippi State: 3 Reasons the Offense Failed",
+      "suggestedFix": "Include 'Mississippi State' in the H1 and Title Tag. Use high-impact verbs like 'Failed' or 'Collapsed' to match post-game search sentiment."
     },
     {
-      "postId": 13822,
-      "currentTitle": "Virtual Reali-Tea Awards 2026: Philo Exclusive Stream Date",
-      "seoIssue": "Title is overly descriptive and lacks a 'click-me' hook. It misses the benefit of watching (e.g., how to stream for free/where to watch).",
-      "suggestedTitle": "Virtual Reali-Tea Awards 2026: How To Watch (Full Guide)",
-      "suggestedFix": "Include a step-by-step 'How to Watch' section to capture 'How to' intent. Link the Philo mention to an affiliate link with 'disclosure' to improve E-E-A-T signals."
+      "postId": 14280,
+      "currentTitle": "Strange New Worlds Series Finale Secrets Revealed",
+      "postLink": "https://brightcelebrity.com/strange-new-worlds-series-finale/",
+      "seoIssue": "Missing 'Star Trek' brand name, the primary high-volume head term. 'Series Finale' implies the show is over, which may conflict with actual renewal status.",
+      "suggestedTitle": "Star Trek: Strange New Worlds Finale - 6 Massive Reveals",
+      "suggestedFix": "Front-load 'Star Trek'. Implement FAQ Schema targeting the question 'Is Strange New Worlds ending?' to capture high-volume SERP features."
     },
     {
-      "postId": 13820,
-      "currentTitle": "NFL Rio Game 2024: Maracana Stadium History Revealed",
-      "seoIssue": "Title confusion: Article claims 2024 but content date is 2026. This creates a massive search intent mismatch and negative user experience signal.",
-      "suggestedTitle": "NFL Brazil 2026: 5 Historic Facts About Maracana Stadium",
-      "suggestedFix": "Immediately audit content to ensure dates match the current year (2026). Update the title to reflect the present, not past events, to avoid high bounce rates."
+      "postId": 14277,
+      "currentTitle": "Ryan Nembhard Nuggets Deal: 2026 Roster Details",
+      "postLink": "https://brightcelebrity.com/ryan-nembhard-nuggets/",
+      "seoIssue": "'Details' is a weak click-magnet. The title fails to explain the transaction's impact on the team's depth chart.",
+      "suggestedTitle": "Ryan Nembhard Nuggets Move: 4 Ways He Changes the Roster",
+      "suggestedFix": "Replace 'Details' with 'Move' or 'Impact'. Add an 'Estimated Depth Chart' graphic and internal links to recent Denver Nuggets roster news."
     }
   ]
 }

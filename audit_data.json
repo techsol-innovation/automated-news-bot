@@ -1,0 +1,44 @@
+{
+  "auditTimestamp": "2026-10-01T04:22:21.030Z",
+  "siteUrl": "https://brightcelebrity.com/",
+  "analyzedPostCount": 5,
+  "gscStatus": "success",
+  "auditResults": [
+    {
+      "postId": 14717,
+      "currentTitle": "Best Halloween Costumes 2026: Top TV & Movie Looks",
+      "postLink": "https://brightcelebrity.com/best-halloween-costumes-2026/",
+      "seoIssue": "Lacks 'hook' power words and specific emotional urgency; headline is generic and misses high-intent modifiers like 'Trending' or 'Easy'.",
+      "suggestedTitle": "10 Best Halloween Costumes 2026: Trending TV & Movie Looks",
+      "suggestedFix": "Update H1 to include a number to increase CTR. Add a section 'Top 5 Trending Pop Culture Costumes' to capture Google SGE snippets. Optimize meta description with 'DIY' and 'Last-minute' keywords."
+    },
+    {
+      "postId": 14715,
+      "currentTitle": "Primetime Movie Review 2026: Robert Pattinson Film Analysis",
+      "seoIssue": "Weak search intent match; the title focuses on 'Review' while searchers likely want the controversy or plot breakdown of the 'To Catch a Predator' depiction.",
+      "suggestedTitle": "Primetime Review: Why Robert Pattinson’s Film Sparks Outrage",
+      "suggestedFix": "Pivot title from 'Analysis' to 'Outrage/Controversy' to match intent. Add a 'People Also Ask' section regarding the real-life Chris Hansen to capture entity-related traffic."
+    },
+    {
+      "postId": 14713,
+      "currentTitle": "Steph Curry Media Day Exit 2026: The Truth Behind It",
+      "seoIssue": "Lacks high-CTR power words; 'The Truth Behind It' is too vague for current events/sports news which requires immediacy and stakes.",
+      "suggestedTitle": "Steph Curry Media Day Exit: 3 Reasons Behind The Frustration",
+      "suggestedFix": "Update title to front-load the athlete name and a listicle format. Add internal links to recent Warriors news to establish topical authority and improve crawl depth."
+    },
+    {
+      "postId": 14711,
+      "currentTitle": "Eli Raridon Baby Loss: Patriots TE Mourns Newborn Son",
+      "seoIssue": "Content is highly sensitive; lacks 'Respectful/Official' entity signals in the metadata, leading to potential search engine suppression for sensitive topics.",
+      "suggestedTitle": "Eli Raridon Statement: Patriots TE Mourns Loss of Son Peter",
+      "suggestedFix": "Refine title to emphasize 'Statement' which is a high-volume search term for celebrity news. Ensure Schema Markup (NewsArticle) is implemented to aid Google's factual verification."
+    },
+    {
+      "postId": 14707,
+      "currentTitle": "Axel Kaiser Explains the Javier Milei Effect 2026",
+      "seoIssue": "Targeting two complex political entities without a clear value proposition; lacks a 'benefit' or 'summary' promise for the reader.",
+      "suggestedTitle": "The Javier Milei Effect: 5 Keys to Argentina’s Economic Shift",
+      "suggestedFix": "Change focus from 'Axel Kaiser explains' (secondary) to 'Javier Milei Effect' (primary). Add a clear summary table of Milei’s 2026 policy metrics to capture featured snippet opportunities."
+    }
+  ]
+}

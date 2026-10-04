@@ -1,44 +1,48 @@
 {
-  "auditTimestamp": "2026-10-01T04:22:21.030Z",
+  "auditTimestamp": "2026-10-04T04:30:43.700Z",
   "siteUrl": "https://brightcelebrity.com/",
   "analyzedPostCount": 5,
   "gscStatus": "success",
   "auditResults": [
     {
-      "postId": 14717,
-      "currentTitle": "Best Halloween Costumes 2026: Top TV & Movie Looks",
-      "postLink": "https://brightcelebrity.com/best-halloween-costumes-2026/",
-      "seoIssue": "Lacks 'hook' power words and specific emotional urgency; headline is generic and misses high-intent modifiers like 'Trending' or 'Easy'.",
-      "suggestedTitle": "10 Best Halloween Costumes 2026: Trending TV & Movie Looks",
-      "suggestedFix": "Update H1 to include a number to increase CTR. Add a section 'Top 5 Trending Pop Culture Costumes' to capture Google SGE snippets. Optimize meta description with 'DIY' and 'Last-minute' keywords."
+      "postId": 15146,
+      "currentTitle": "Dating App Chivalry Mode 2026: Why Women Want Pursuit",
+      "postLink": "https://brightcelebrity.com/dating-app-chivalry-mode/",
+      "seoIssue": "Title uses passive phrasing and lacks a high-CTR 'curiosity gap' or listicle hook for Gen Z demographic searchers.",
+      "suggestedTitle": "Dating App Chivalry Mode: 7 Reasons Gen Z Loves It in 2026",
+      "suggestedFix": "Front-load the primary keyword 'Dating App Chivalry Mode' and add a numeric listicle hook. Update the meta description to include 'Match Group' and 'Upward' to capture brand-specific entity traffic."
     },
     {
-      "postId": 14715,
-      "currentTitle": "Primetime Movie Review 2026: Robert Pattinson Film Analysis",
-      "seoIssue": "Weak search intent match; the title focuses on 'Review' while searchers likely want the controversy or plot breakdown of the 'To Catch a Predator' depiction.",
-      "suggestedTitle": "Primetime Review: Why Robert Pattinson’s Film Sparks Outrage",
-      "suggestedFix": "Pivot title from 'Analysis' to 'Outrage/Controversy' to match intent. Add a 'People Also Ask' section regarding the real-life Chris Hansen to capture entity-related traffic."
+      "postId": 15144,
+      "currentTitle": "Fox Chapel Girls Golf 2024: Historic WPIAL Final Results",
+      "postLink": "https://brightcelebrity.com/fox-chapel-girls-golf/",
+      "seoIssue": "The 2024 date in the title creates a relevance conflict for 2026 searchers; 'Results' needs more urgency.",
+      "suggestedTitle": "Fox Chapel Girls Golf: Historic WPIAL Results & 2024 Scores",
+      "suggestedFix": "Reframing as a 'Historic' record allows the 2024 data to rank for evergreen 'WPIAL' queries. Add Table Schema to the content snippet to win the 'featured snippet' for athlete scores."
     },
     {
-      "postId": 14713,
-      "currentTitle": "Steph Curry Media Day Exit 2026: The Truth Behind It",
-      "seoIssue": "Lacks high-CTR power words; 'The Truth Behind It' is too vague for current events/sports news which requires immediacy and stakes.",
-      "suggestedTitle": "Steph Curry Media Day Exit: 3 Reasons Behind The Frustration",
-      "suggestedFix": "Update title to front-load the athlete name and a listicle format. Add internal links to recent Warriors news to establish topical authority and improve crawl depth."
+      "postId": 15142,
+      "currentTitle": "Pandora Vanderpump Sabo 2026: Life, Family & Career Updates",
+      "postLink": "https://brightcelebrity.com/pandora-vanderpump-sabo-2026/",
+      "seoIssue": "Generic 'Life/Family/Career' phrasing lacks high-volume search modifiers like 'Net Worth' or specific 'Husband' queries.",
+      "suggestedTitle": "Pandora Vanderpump Sabo 2026: Net Worth, Kids & Secrets",
+      "suggestedFix": "Replace generic descriptors with high-volume entity modifiers ('Net Worth', 'Husband'). Add FAQ Schema targeting 'How many children does Pandora Sabo have?' to increase SERP real estate."
     },
     {
-      "postId": 14711,
-      "currentTitle": "Eli Raridon Baby Loss: Patriots TE Mourns Newborn Son",
-      "seoIssue": "Content is highly sensitive; lacks 'Respectful/Official' entity signals in the metadata, leading to potential search engine suppression for sensitive topics.",
-      "suggestedTitle": "Eli Raridon Statement: Patriots TE Mourns Loss of Son Peter",
-      "suggestedFix": "Refine title to emphasize 'Statement' which is a high-volume search term for celebrity news. Ensure Schema Markup (NewsArticle) is implemented to aid Google's factual verification."
+      "postId": 15139,
+      "currentTitle": "Middle Eastern voices documentaries: A 2024 Retrospective",
+      "postLink": "https://brightcelebrity.com/middle-eastern-voices-documentaries/",
+      "seoIssue": "'Retrospective' is a low-intent academic term; title lacks a 'Best/Must-Watch' recommendation hook for 2026.",
+      "suggestedTitle": "10 Best Middle Eastern Documentaries You Must Watch in 2026",
+      "suggestedFix": "Pivot from a 'Retrospective' to a 'Best of' recommendation list. Front-load 'Middle Eastern Documentaries' and use power words like 'Must Watch' to satisfy 'Discovery' intent."
     },
     {
-      "postId": 14707,
-      "currentTitle": "Axel Kaiser Explains the Javier Milei Effect 2026",
-      "seoIssue": "Targeting two complex political entities without a clear value proposition; lacks a 'benefit' or 'summary' promise for the reader.",
-      "suggestedTitle": "The Javier Milei Effect: 5 Keys to Argentina’s Economic Shift",
-      "suggestedFix": "Change focus from 'Axel Kaiser explains' (secondary) to 'Javier Milei Effect' (primary). Add a clear summary table of Milei’s 2026 policy metrics to capture featured snippet opportunities."
+      "postId": 15137,
+      "currentTitle": "Clemson vs. Miami Odds 2026: Week 5 Betting Preview",
+      "postLink": "https://brightcelebrity.com/clemson-vs-miami-odds/",
+      "seoIssue": "Title misses 'Picks' and 'Predictions' keywords which drive the highest CTR for sports betting intent.",
+      "suggestedTitle": "Clemson vs Miami Odds: Week 5 Betting Picks & Predictions",
+      "suggestedFix": "Incorporate 'Picks' and 'Predictions' into the H1 and Title tag. Use a 'Compare' schema for the odds section to improve visibility in Google News and Sports carousels."
     }
   ]
 }

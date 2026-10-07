@@ -1,48 +1,48 @@
 {
-  "auditTimestamp": "2026-10-04T04:30:43.700Z",
+  "auditTimestamp": "2026-10-07T04:31:23.609Z",
   "siteUrl": "https://brightcelebrity.com/",
   "analyzedPostCount": 5,
   "gscStatus": "success",
   "auditResults": [
     {
-      "postId": 15146,
-      "currentTitle": "Dating App Chivalry Mode 2026: Why Women Want Pursuit",
-      "postLink": "https://brightcelebrity.com/dating-app-chivalry-mode/",
-      "seoIssue": "Title uses passive phrasing and lacks a high-CTR 'curiosity gap' or listicle hook for Gen Z demographic searchers.",
-      "suggestedTitle": "Dating App Chivalry Mode: 7 Reasons Gen Z Loves It in 2026",
-      "suggestedFix": "Front-load the primary keyword 'Dating App Chivalry Mode' and add a numeric listicle hook. Update the meta description to include 'Match Group' and 'Upward' to capture brand-specific entity traffic."
+      "postId": 15566,
+      "currentTitle": "ESPN Fernandez & Friends Controversy: Fans Demand Audio Fix",
+      "postLink": "https://brightcelebrity.com/espn-fernandez-friends/",
+      "seoIssue": "Vague title lacks emotional trigger and specific search intent for the 'controversy'.",
+      "suggestedTitle": "ESPN Fernandez & Friends: Why Fans Are Outraged (Fix Found)",
+      "suggestedFix": "Update H1 to include 'Outraged' and 'Fix'. Add a dedicated 'Troubleshooting' section with bullet points to capture 'how-to-fix' search traffic."
     },
     {
-      "postId": 15144,
-      "currentTitle": "Fox Chapel Girls Golf 2024: Historic WPIAL Final Results",
-      "postLink": "https://brightcelebrity.com/fox-chapel-girls-golf/",
-      "seoIssue": "The 2024 date in the title creates a relevance conflict for 2026 searchers; 'Results' needs more urgency.",
-      "suggestedTitle": "Fox Chapel Girls Golf: Historic WPIAL Results & 2024 Scores",
-      "suggestedFix": "Reframing as a 'Historic' record allows the 2024 data to rank for evergreen 'WPIAL' queries. Add Table Schema to the content snippet to win the 'featured snippet' for athlete scores."
+      "postId": 15564,
+      "currentTitle": "Bear Bachmeier Stats: 2026 Big 12 Performance Analysis",
+      "postLink": "https://brightcelebrity.com/bear-bachmeier-stats/",
+      "seoIssue": "Dry, clinical title fails to hook sports fans looking for hot takes or performance rankings.",
+      "suggestedTitle": "Bear Bachmeier Stats: 5 Reasons He’s Rising in 2026",
+      "suggestedFix": "Rewrite title to include a listicle number. Add an 'Expert Analysis' table comparing his stats to top Big 12 peers to boost E-E-A-T."
     },
     {
-      "postId": 15142,
-      "currentTitle": "Pandora Vanderpump Sabo 2026: Life, Family & Career Updates",
-      "postLink": "https://brightcelebrity.com/pandora-vanderpump-sabo-2026/",
-      "seoIssue": "Generic 'Life/Family/Career' phrasing lacks high-volume search modifiers like 'Net Worth' or specific 'Husband' queries.",
-      "suggestedTitle": "Pandora Vanderpump Sabo 2026: Net Worth, Kids & Secrets",
-      "suggestedFix": "Replace generic descriptors with high-volume entity modifiers ('Net Worth', 'Husband'). Add FAQ Schema targeting 'How many children does Pandora Sabo have?' to increase SERP real estate."
+      "postId": 15562,
+      "currentTitle": "Marcus Davenport Retirement: NFL Career 2025 Recap",
+      "postLink": "https://brightcreative.com/marcus-davenport-retirement/",
+      "seoIssue": "Missing 'Why' factor; readers searching for retirement news want the 'reason' or 'truth' behind the exit.",
+      "suggestedTitle": "Marcus Davenport Retirement: The Truth Behind His NFL Exit",
+      "suggestedFix": "Update title to include 'The Truth'. Add a schema-marked FAQ section addressing 'Why did Marcus Davenport retire' to capture Google Featured Snippets."
     },
     {
-      "postId": 15139,
-      "currentTitle": "Middle Eastern voices documentaries: A 2024 Retrospective",
-      "postLink": "https://brightcelebrity.com/middle-eastern-voices-documentaries/",
-      "seoIssue": "'Retrospective' is a low-intent academic term; title lacks a 'Best/Must-Watch' recommendation hook for 2026.",
-      "suggestedTitle": "10 Best Middle Eastern Documentaries You Must Watch in 2026",
-      "suggestedFix": "Pivot from a 'Retrospective' to a 'Best of' recommendation list. Front-load 'Middle Eastern Documentaries' and use power words like 'Must Watch' to satisfy 'Discovery' intent."
+      "postId": 15559,
+      "currentTitle": "The Shout Movie 2025: Jerzy Skolimowski’s Cult Horror Recap",
+      "postLink": "https://brightcelebrity.com/the-shout-movie-2025/",
+      "seoIssue": "Confusing year labeling (2025 vs 1978) causing intent mismatch and low CTR.",
+      "suggestedTitle": "The Shout (1978): Why This Cult Horror Masterpiece Endures",
+      "suggestedFix": "Update title to reflect the correct release year. Add a 'Key Scenes' section and 'Related Horror Classics' links to improve internal crawl depth."
     },
     {
-      "postId": 15137,
-      "currentTitle": "Clemson vs. Miami Odds 2026: Week 5 Betting Preview",
-      "postLink": "https://brightcelebrity.com/clemson-vs-miami-odds/",
-      "seoIssue": "Title misses 'Picks' and 'Predictions' keywords which drive the highest CTR for sports betting intent.",
-      "suggestedTitle": "Clemson vs Miami Odds: Week 5 Betting Picks & Predictions",
-      "suggestedFix": "Incorporate 'Picks' and 'Predictions' into the H1 and Title tag. Use a 'Compare' schema for the odds section to improve visibility in Google News and Sports carousels."
+      "postId": 15557,
+      "currentTitle": "Eva Marie Saint Death: Life and Career Highlights",
+      "postLink": "https://brightcelebrity.com/eva-marie-saint-death/",
+      "seoIssue": "Low CTR due to passive, generic phrasing that lacks the 'tribute' or 'legacy' emotional hook.",
+      "suggestedTitle": "Eva Marie Saint: Remembering the Life of a Hollywood Legend",
+      "suggestedFix": "Update title to emphasize 'Legend' and 'Remembering'. Ensure Meta Description includes her Oscar-winning status to improve search relevance."
     }
   ]
 }

@@ -1,48 +1,48 @@
 {
-  "auditTimestamp": "2026-10-07T04:31:23.609Z",
+  "auditTimestamp": "2026-10-10T04:30:53.327Z",
   "siteUrl": "https://brightcelebrity.com/",
   "analyzedPostCount": 5,
   "gscStatus": "success",
   "auditResults": [
     {
-      "postId": 15566,
-      "currentTitle": "ESPN Fernandez & Friends Controversy: Fans Demand Audio Fix",
-      "postLink": "https://brightcelebrity.com/espn-fernandez-friends/",
-      "seoIssue": "Vague title lacks emotional trigger and specific search intent for the 'controversy'.",
-      "suggestedTitle": "ESPN Fernandez & Friends: Why Fans Are Outraged (Fix Found)",
-      "suggestedFix": "Update H1 to include 'Outraged' and 'Fix'. Add a dedicated 'Troubleshooting' section with bullet points to capture 'how-to-fix' search traffic."
+      "postId": 16005,
+      "currentTitle": "Other Mommy Movie Review: Jessica Chastain Horror 2024",
+      "postLink": "https://brightcelebrity.com/other-mommy-movie-review/",
+      "seoIssue": "Topic cannibalization with Post 16000, outdated 2024 date tag, and lack of CTR power words to drive organic clicks.",
+      "suggestedTitle": "Other Mommy Movie Review: 5 Shocking Twist Details",
+      "suggestedFix": "Differentiate search intent from Post 16000 by converting this into a structured numerical critique. Update temporal anchors to 2026, implement Review Schema markup with star ratings, and rewrite the meta description to focus on Rob Savage's directorial analysis."
     },
     {
-      "postId": 15564,
-      "currentTitle": "Bear Bachmeier Stats: 2026 Big 12 Performance Analysis",
-      "postLink": "https://brightcelebrity.com/bear-bachmeier-stats/",
-      "seoIssue": "Dry, clinical title fails to hook sports fans looking for hot takes or performance rankings.",
-      "suggestedTitle": "Bear Bachmeier Stats: 5 Reasons He’s Rising in 2026",
-      "suggestedFix": "Rewrite title to include a listicle number. Add an 'Expert Analysis' table comparing his stats to top Big 12 peers to boost E-E-A-T."
+      "postId": 16003,
+      "currentTitle": "West Holt Girls Golf: Class C State Tournament 2025",
+      "postLink": "https://brightcelebrity.com/west-holt-girls-golf/",
+      "seoIssue": "Outdated year target (2025 in a 2026 context), flat passive phrasing, and missing engagement hooks for high-intent sports searchers.",
+      "suggestedTitle": "West Holt Girls Golf: 5 Keys to 2026 Class C Victory",
+      "suggestedFix": "Update title and body content to target the 2026 season. Add SportsEvent schema markup, front-load the primary entity ('West Holt Girls Golf'), and build internal links to high-authority regional sports category pages."
     },
     {
-      "postId": 15562,
-      "currentTitle": "Marcus Davenport Retirement: NFL Career 2025 Recap",
-      "postLink": "https://brightcreative.com/marcus-davenport-retirement/",
-      "seoIssue": "Missing 'Why' factor; readers searching for retirement news want the 'reason' or 'truth' behind the exit.",
-      "suggestedTitle": "Marcus Davenport Retirement: The Truth Behind His NFL Exit",
-      "suggestedFix": "Update title to include 'The Truth'. Add a schema-marked FAQ section addressing 'Why did Marcus Davenport retire' to capture Google Featured Snippets."
+      "postId": 16000,
+      "currentTitle": "Jessica Chastain Horror Movie 2025: Review & Ending Details",
+      "postLink": "https://brightcelebrity.com/jessica-chastain-horror-movie/",
+      "seoIssue": "Direct keyword cannibalization with Post 16005, generic query targeting, and outdated 2025 year tag in the headline.",
+      "suggestedTitle": "Jessica Chastain Horror Movie: Other Mommy Ending Explained",
+      "suggestedFix": "Pivot focus explicitly toward 'Ending Explained' search intent to remove cannibalization with Post 16005. Update date references to 2026, add FAQ schema for 'Other Mommy ending twist', and optimize meta snippet for high-curiosity SERP clicks."
     },
     {
-      "postId": 15559,
-      "currentTitle": "The Shout Movie 2025: Jerzy Skolimowski’s Cult Horror Recap",
-      "postLink": "https://brightcelebrity.com/the-shout-movie-2025/",
-      "seoIssue": "Confusing year labeling (2025 vs 1978) causing intent mismatch and low CTR.",
-      "suggestedTitle": "The Shout (1978): Why This Cult Horror Masterpiece Endures",
-      "suggestedFix": "Update title to reflect the correct release year. Add a 'Key Scenes' section and 'Related Horror Classics' links to improve internal crawl depth."
+      "postId": 15998,
+      "currentTitle": "Build A Routine That Sticks: 2026 Productivity Guide",
+      "postLink": "https://brightcelebrity.com/build-a-routine-that-sticks/",
+      "seoIssue": "Generic lifestyle title lacking numerical appeal, weak SERP curiosity hook, and topical authority disconnect on an entertainment publication.",
+      "suggestedTitle": "Build a Routine That Sticks: 7 Daily Habits for 2026",
+      "suggestedFix": "Add numerical listicle framing ('7 Daily Habits') to improve SERP CTR. Implement HowTo structured data markup, rewrite the intro to feature clear habit-stacking bullet points, and add contextual internal links to wellness news."
     },
     {
-      "postId": 15557,
-      "currentTitle": "Eva Marie Saint Death: Life and Career Highlights",
-      "postLink": "https://brightcelebrity.com/eva-marie-saint-death/",
-      "seoIssue": "Low CTR due to passive, generic phrasing that lacks the 'tribute' or 'legacy' emotional hook.",
-      "suggestedTitle": "Eva Marie Saint: Remembering the Life of a Hollywood Legend",
-      "suggestedFix": "Update title to emphasize 'Legend' and 'Remembering'. Ensure Meta Description includes her Oscar-winning status to improve search relevance."
+      "postId": 15995,
+      "currentTitle": "Jacy Jayne Money in the Bank 2026: Strategy",
+      "postLink": "https://brightcelebrity.com/jacy-jayne-money-in-the-bank/",
+      "seoIssue": "Dry headline ending with passive text ('Strategy'), failing to leverage viral hooks in the text such as the '52-time fake cash-in plan'.",
+      "suggestedTitle": "Jacy Jayne Money in the Bank 2026: 5 Wild Strategy Secrets",
+      "suggestedFix": "Inject strong power words ('Wild Strategy Secrets') and a numerical element into the title. Add SportsEvent/WWE entity tags, incorporate schema markup for sports news, and optimize the meta description around the cash-in intrigue."
     }
   ]
 }

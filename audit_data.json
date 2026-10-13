@@ -1,48 +1,48 @@
 {
-  "auditTimestamp": "2026-10-10T04:30:53.327Z",
+  "auditTimestamp": "2026-10-13T05:38:24.630Z",
   "siteUrl": "https://brightcelebrity.com/",
   "analyzedPostCount": 5,
   "gscStatus": "success",
   "auditResults": [
     {
-      "postId": 16005,
-      "currentTitle": "Other Mommy Movie Review: Jessica Chastain Horror 2024",
-      "postLink": "https://brightcelebrity.com/other-mommy-movie-review/",
-      "seoIssue": "Topic cannibalization with Post 16000, outdated 2024 date tag, and lack of CTR power words to drive organic clicks.",
-      "suggestedTitle": "Other Mommy Movie Review: 5 Shocking Twist Details",
-      "suggestedFix": "Differentiate search intent from Post 16000 by converting this into a structured numerical critique. Update temporal anchors to 2026, implement Review Schema markup with star ratings, and rewrite the meta description to focus on Rob Savage's directorial analysis."
+      "postId": 16451,
+      "currentTitle": "Val Venis AEW Full Gear Confrontation: What Fans Can Expect",
+      "postLink": "https://brightcelebrity.com/val-venis-aew-full-gear/",
+      "seoIssue": "Weak emotional hook and lack of urgency; title feels descriptive rather than breaking news-focused.",
+      "suggestedTitle": "Val Venis AEW Full Gear Protest: 5 Things to Know Now",
+      "suggestedFix": "Update H1 to include 'Protest' for intent matching. Add a 'Safety/Security' section to capture traffic from fans searching for event disruptions. Ensure meta description highlights the exact time/location."
     },
     {
-      "postId": 16003,
-      "currentTitle": "West Holt Girls Golf: Class C State Tournament 2025",
-      "postLink": "https://brightcelebrity.com/west-holt-girls-golf/",
-      "seoIssue": "Outdated year target (2025 in a 2026 context), flat passive phrasing, and missing engagement hooks for high-intent sports searchers.",
-      "suggestedTitle": "West Holt Girls Golf: 5 Keys to 2026 Class C Victory",
-      "suggestedFix": "Update title and body content to target the 2026 season. Add SportsEvent schema markup, front-load the primary entity ('West Holt Girls Golf'), and build internal links to high-authority regional sports category pages."
+      "postId": 16447,
+      "currentTitle": "Hasbro Marvel Legends 2026: Lord Doom Release Details",
+      "postLink": "https://brightcelebrity.com/hasbro-marvel-legends-2026/",
+      "seoIssue": "Title lacks a high-intent transactional keyword like 'Pre-order' or 'Price', which collectors prioritize.",
+      "suggestedTitle": "Hasbro Marvel Legends 2026: Lord Doom Pre-order Guide",
+      "suggestedFix": "Update H1 to target 'Pre-order' and 'Price'. Add a structured Table of Contents with jump links to 'Pre-order Dates' and 'Figure Features' to help secure Google Sitelinks."
     },
     {
-      "postId": 16000,
-      "currentTitle": "Jessica Chastain Horror Movie 2025: Review & Ending Details",
-      "postLink": "https://brightcelebrity.com/jessica-chastain-horror-movie/",
-      "seoIssue": "Direct keyword cannibalization with Post 16005, generic query targeting, and outdated 2025 year tag in the headline.",
-      "suggestedTitle": "Jessica Chastain Horror Movie: Other Mommy Ending Explained",
-      "suggestedFix": "Pivot focus explicitly toward 'Ending Explained' search intent to remove cannibalization with Post 16005. Update date references to 2026, add FAQ schema for 'Other Mommy ending twist', and optimize meta snippet for high-curiosity SERP clicks."
+      "postId": 16445,
+      "currentTitle": "Hexed Footage Reaction: Disney’s 2026 Magical Adventure",
+      "postLink": "https://brightcelebrity.com/hexed-footage-reaction/",
+      "seoIssue": "Vague title fails to leverage the high-search volume actor name 'Walton Goggins' mentioned in content.",
+      "suggestedTitle": "Disney’s Hexed Footage: Walton Goggins’ Role & Release Date",
+      "suggestedFix": "Move actor name to the front of the title. Add schema markup for 'Movie' to help trigger an Info Panel in SERPs."
     },
     {
-      "postId": 15998,
-      "currentTitle": "Build A Routine That Sticks: 2026 Productivity Guide",
-      "postLink": "https://brightcelebrity.com/build-a-routine-that-sticks/",
-      "seoIssue": "Generic lifestyle title lacking numerical appeal, weak SERP curiosity hook, and topical authority disconnect on an entertainment publication.",
-      "suggestedTitle": "Build a Routine That Sticks: 7 Daily Habits for 2026",
-      "suggestedFix": "Add numerical listicle framing ('7 Daily Habits') to improve SERP CTR. Implement HowTo structured data markup, rewrite the intro to feature clear habit-stacking bullet points, and add contextual internal links to wellness news."
+      "postId": 16443,
+      "currentTitle": "Big Ten Officiating Error 2026: Oregon 2-Point Mistake",
+      "postLink": "https://brightcelebrity.com/big-ten-officiating-error-2026/",
+      "seoIssue": "Lacks a 'scandal' or 'controversy' power word to capture high-traffic search volume related to officiating debates.",
+      "suggestedTitle": "Big Ten Scandal: Oregon vs. UCLA 2-Point Rule Breakdown",
+      "suggestedFix": "Change focus from generic 'error' to 'controversy/scandal'. Add an FAQ section addressing 'Will the Big Ten change the rule?' to capture Google PAA snippets."
     },
     {
-      "postId": 15995,
-      "currentTitle": "Jacy Jayne Money in the Bank 2026: Strategy",
-      "postLink": "https://brightcelebrity.com/jacy-jayne-money-in-the-bank/",
-      "seoIssue": "Dry headline ending with passive text ('Strategy'), failing to leverage viral hooks in the text such as the '52-time fake cash-in plan'.",
-      "suggestedTitle": "Jacy Jayne Money in the Bank 2026: 5 Wild Strategy Secrets",
-      "suggestedFix": "Inject strong power words ('Wild Strategy Secrets') and a numerical element into the title. Add SportsEvent/WWE entity tags, incorporate schema markup for sports news, and optimize the meta description around the cash-in intrigue."
+      "postId": 16441,
+      "currentTitle": "Zverev Year End Ranking 2026: Official Results Recap",
+      "postLink": "https://brightcelebrity.com/alexander-zverev-year-end-ranking-2026/",
+      "seoIssue": "Passive phrasing ('Recap') and misses the high-value keyword 'World No. 1' which drives significant news traffic.",
+      "suggestedTitle": "Alexander Zverev: How He Clinched World No. 1 Ranking 2026",
+      "suggestedFix": "Update title to be outcome-driven. Use the H1 to highlight the 'World No. 1' achievement. Add a summary table comparing Zverev's stats against other top 5 ATP players."
     }
   ]
 }

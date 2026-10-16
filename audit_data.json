@@ -1,48 +1,44 @@
 {
-  "auditTimestamp": "2026-10-13T05:38:24.630Z",
+  "auditTimestamp": "2026-10-16T03:18:35.291Z",
   "siteUrl": "https://brightcelebrity.com/",
   "analyzedPostCount": 5,
   "gscStatus": "success",
   "auditResults": [
     {
-      "postId": 16451,
-      "currentTitle": "Val Venis AEW Full Gear Confrontation: What Fans Can Expect",
-      "postLink": "https://brightcelebrity.com/val-venis-aew-full-gear/",
-      "seoIssue": "Weak emotional hook and lack of urgency; title feels descriptive rather than breaking news-focused.",
-      "suggestedTitle": "Val Venis AEW Full Gear Protest: 5 Things to Know Now",
-      "suggestedFix": "Update H1 to include 'Protest' for intent matching. Add a 'Safety/Security' section to capture traffic from fans searching for event disruptions. Ensure meta description highlights the exact time/location."
+      "postId": 16861,
+      "currentTitle": "Scream 4K Box Set 2026: Horror Fan Essentials",
+      "postLink": "https://brightcelebrity.com/scream-4k-box-set/",
+      "seoIssue": "Weak CTR appeal; lacks urgency and specific consumer benefit; title is too generic for a high-value collector's item.",
+      "suggestedTitle": "Scream 4K Box Set: Pre-Order Details & 30th Anniversary Guide",
+      "suggestedFix": "Update H1 to include 'Pre-Order' as a primary intent signal. Add schema markup for 'Product' to display price and availability directly in SERPs."
     },
     {
-      "postId": 16447,
-      "currentTitle": "Hasbro Marvel Legends 2026: Lord Doom Release Details",
-      "postLink": "https://brightcelebrity.com/hasbro-marvel-legends-2026/",
-      "seoIssue": "Title lacks a high-intent transactional keyword like 'Pre-order' or 'Price', which collectors prioritize.",
-      "suggestedTitle": "Hasbro Marvel Legends 2026: Lord Doom Pre-order Guide",
-      "suggestedFix": "Update H1 to target 'Pre-order' and 'Price'. Add a structured Table of Contents with jump links to 'Pre-order Dates' and 'Figure Features' to help secure Google Sitelinks."
+      "postId": 16859,
+      "currentTitle": "Netflix Steps Trailer: Amanda Seyfried Fairytale Twist 2024",
+      "seoIssue": "Year mismatch (Article date is 2026, title says 2024); missing high-volume modifiers like 'Watch' or 'Release Date'.",
+      "suggestedTitle": "Netflix Steps Trailer: Release Date & Amanda Seyfried Musical",
+      "suggestedFix": "Correct the year in the H1/Title to 2026. Insert a 'Watch' call-to-action in the meta description and add 'Cast & Plot' details to the first 100 words."
     },
     {
-      "postId": 16445,
-      "currentTitle": "Hexed Footage Reaction: Disney’s 2026 Magical Adventure",
-      "postLink": "https://brightcelebrity.com/hexed-footage-reaction/",
-      "seoIssue": "Vague title fails to leverage the high-search volume actor name 'Walton Goggins' mentioned in content.",
-      "suggestedTitle": "Disney’s Hexed Footage: Walton Goggins’ Role & Release Date",
-      "suggestedFix": "Move actor name to the front of the title. Add schema markup for 'Movie' to help trigger an Info Panel in SERPs."
+      "postId": 16857,
+      "currentTitle": "Westmoreland County football milestones: History and Stats 2024",
+      "seoIssue": "Date discrepancy and non-descriptive title; fails to capitalize on the '800 wins' news hook which is the actual traffic driver.",
+      "suggestedTitle": "Westmoreland County Football: Jeannette Hits Historic 800 Wins",
+      "suggestedFix": "Front-load the entity 'Jeannette' and the '800 wins' milestone. Update title to remove '2024' and replace with a trending '2026' or evergreen modifier."
     },
     {
-      "postId": 16443,
-      "currentTitle": "Big Ten Officiating Error 2026: Oregon 2-Point Mistake",
-      "postLink": "https://brightcelebrity.com/big-ten-officiating-error-2026/",
-      "seoIssue": "Lacks a 'scandal' or 'controversy' power word to capture high-traffic search volume related to officiating debates.",
-      "suggestedTitle": "Big Ten Scandal: Oregon vs. UCLA 2-Point Rule Breakdown",
-      "suggestedFix": "Change focus from generic 'error' to 'controversy/scandal'. Add an FAQ section addressing 'Will the Big Ten change the rule?' to capture Google PAA snippets."
+      "postId": 16856,
+      "currentTitle": "Matt Bonislawski Legacy: 2001 Playoff Run Recap",
+      "seoIssue": "Low search intent match; lacks 'Local Sports' signals; title is too abstract and misses the 'Highlands' keyword relevance.",
+      "suggestedTitle": "Matt Bonislawski: The Highlands 2001 Playoff Run Revisited",
+      "suggestedFix": "Optimize for long-tail queries by including 'Highlands Football Stats' in the meta description. Add internal links from local news category archives."
     },
     {
-      "postId": 16441,
-      "currentTitle": "Zverev Year End Ranking 2026: Official Results Recap",
-      "postLink": "https://brightcelebrity.com/alexander-zverev-year-end-ranking-2026/",
-      "seoIssue": "Passive phrasing ('Recap') and misses the high-value keyword 'World No. 1' which drives significant news traffic.",
-      "suggestedTitle": "Alexander Zverev: How He Clinched World No. 1 Ranking 2026",
-      "suggestedFix": "Update title to be outcome-driven. Use the H1 to highlight the 'World No. 1' achievement. Add a summary table comparing Zverev's stats against other top 5 ATP players."
+      "postId": 16854,
+      "currentTitle": "Spooky Link Goes Digital: 2026 Online Gaming Expansion",
+      "seoIssue": "Lacks specific industry keywords for the iGaming niche; title is too vague to capture high-intent 'Spooky Link slot' traffic.",
+      "suggestedTitle": "Spooky Link Goes Digital: How to Play Online (2026 Guide)",
+      "suggestedFix": "Revise H1 to include 'Online Slot' to capture intent. Add FAQ Schema to address 'How to play' and 'Where to find' to capture Google Featured Snippets."
     }
   ]
 }

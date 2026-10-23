@@ -1,21 +1,18 @@
-name: AI SEO Audit & Telegram Alerts (Phase 1)
+name: AI SEO Audit → Fix → Learn Pipeline
 
 on:
-  schedule:
-    - cron: '0 0 */3 * *'
+  # AUTOMATION STOPPED - All scheduled cron runs paused
+  # schedule:
+  #   # Runs every 3 days at midnight UTC — staggers with daily quick check (4 AM) and weekly full pipeline (Sunday 3 AM)
+  #   - cron: '0 0 */3 * *'
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
-  seo-audit:
+  seo-audit-fix-learn:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-        with:
-          ref: main
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -25,19 +22,34 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Run AI SEO Audit Pipeline
+      # Phase 1: Diagnose — GSC performance + Gemini analysis on 5 recent posts
+      - name: "Phase 1: AI SEO Audit (Diagnose)"
         env:
-          WP_URL: ${{ secrets.WP_URL || vars.WP_URL || 'https://brightcelebrity.com/' }}
+          WP_URL: ${{ secrets.WP_URL || vars.WP_URL }}
           WP_USERNAME: ${{ secrets.WP_USERNAME || vars.WP_USERNAME }}
           WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD || vars.WP_APP_PASSWORD }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || vars.GEMINI_API_KEY }}
           GSC_CREDENTIALS: ${{ secrets.GSC_CREDENTIALS }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || vars.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || vars.TELEGRAM_CHAT_ID }}
         run: node audit.js
 
-      - name: Commit and Push Audit Data
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "Automated SEO Audit: Updated audit_data.json"
-          file_pattern: "audit_data.json"
+      # Phase 2: Treat — Apply title fixes + ping Indexing API + extract SEO lessons
+      - name: "Phase 2: Apply Fixes + Self-Learning (Treat)"
+        env:
+          WP_URL: ${{ secrets.WP_URL || vars.WP_URL }}
+          WP_USERNAME: ${{ secrets.WP_USERNAME || vars.WP_USERNAME }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD || vars.WP_APP_PASSWORD }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || vars.GEMINI_API_KEY }}
+          GSC_CREDENTIALS: ${{ secrets.GSC_CREDENTIALS }}
+        run: node fixer.js
+
+      # Phase 3: Harden — Run technical indexing to catch title metadata + PageRank issues
+      - name: "Phase 3: Technical Hardening (Prevent)"
+        env:
+          WP_URL: ${{ secrets.WP_URL || vars.WP_URL }}
+          WP_USERNAME: ${{ secrets.WP_USERNAME || vars.WP_USERNAME }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD || vars.WP_APP_PASSWORD }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || vars.GEMINI_API_KEY }}
+          GSC_CREDENTIALS: ${{ secrets.GSC_CREDENTIALS }}
+        run: node seo_orchestrator.js --technical

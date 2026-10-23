@@ -1,12 +1,38 @@
-name: CraftZone Auto Publisher (3x Daily)
+name: CraftZone Auto Publisher + SEO Automation (David Quaid)
 
 on:
-  schedule:
-    - cron: '0 6,14,22 * * *'
+  # AUTOMATION STOPPED - All scheduled cron runs paused to prevent automated publishing/crawling
+  # schedule:
+  #   # ── Content Publishing: 3x daily ──
+  #   - cron: '0 6,14,22 * * *'
+  #   # ── SEO Quick Health Check: Daily at 4 AM UTC ──
+  #   - cron: '0 4 * * *'
+  #   # ── Full SEO Pipeline: Weekly on Sunday at 3 AM UTC ──
+  #   - cron: '0 3 * * 0'
   workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Execution mode'
+        required: true
+        default: 'publish'
+        type: choice
+        options:
+          - publish
+          - seo-full
+          - seo-quick
+          - seo-authority
+          - seo-technical
+          - seo-content
+          - audit-fix
 
 jobs:
+  # ═══════════════════════════════════════════════════════════
+  # JOB 1: Content Publishing Pipeline (3x daily)
+  # ═══════════════════════════════════════════════════════════
   publish-article:
+    if: >
+      github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'publish' ||
+      github.event_name == 'schedule' && github.event.schedule == '0 6,14,22 * * *'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -37,3 +63,142 @@ jobs:
 
       - name: Ping IndexNow for Published URLs
         run: node indexer.js
+
+  # ═══════════════════════════════════════════════════════════
+  # JOB 2: Daily SEO Quick Health Check (4 AM UTC)
+  # ═══════════════════════════════════════════════════════════
+  seo-quick-check:
+    if: >
+      github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'seo-quick' ||
+      github.event_name == 'schedule' && github.event.schedule == '0 4 * * *'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run SEO Quick Health Check
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || vars.GEMINI_API_KEY }}
+          WP_USERNAME: ${{ secrets.WP_USERNAME || vars.WP_USERNAME }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD || vars.WP_APP_PASSWORD }}
+          WP_URL: ${{ secrets.WP_URL || vars.WP_URL }}
+          GSC_CREDENTIALS: ${{ secrets.GSC_CREDENTIALS }}
+        run: node seo_orchestrator.js --quick
+
+  # ═══════════════════════════════════════════════════════════
+  # JOB 3: Weekly Full SEO Pipeline (Sunday 3 AM UTC)
+  # ═══════════════════════════════════════════════════════════
+  seo-full-pipeline:
+    if: >
+      github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'seo-full' ||
+      github.event_name == 'schedule' && github.event.schedule == '0 3 * * 0'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Full David Quaid SEO Pipeline
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || vars.GEMINI_API_KEY }}
+          WP_USERNAME: ${{ secrets.WP_USERNAME || vars.WP_USERNAME }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD || vars.WP_APP_PASSWORD }}
+          WP_URL: ${{ secrets.WP_URL || vars.WP_URL }}
+          GSC_CREDENTIALS: ${{ secrets.GSC_CREDENTIALS }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || vars.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID || vars.TELEGRAM_CHANNEL_ID }}
+        run: node seo_orchestrator.js --full
+
+  # ═══════════════════════════════════════════════════════════
+  # JOB 4: Individual Pillar Runs (Manual Dispatch Only)
+  # ═══════════════════════════════════════════════════════════
+  seo-pillar:
+    if: >
+      github.event_name == 'workflow_dispatch' &&
+      (github.event.inputs.mode == 'seo-authority' ||
+       github.event.inputs.mode == 'seo-technical' ||
+       github.event.inputs.mode == 'seo-content')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run SEO Pillar
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || vars.GEMINI_API_KEY }}
+          WP_USERNAME: ${{ secrets.WP_USERNAME || vars.WP_USERNAME }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD || vars.WP_APP_PASSWORD }}
+          WP_URL: ${{ secrets.WP_URL || vars.WP_URL }}
+          GSC_CREDENTIALS: ${{ secrets.GSC_CREDENTIALS }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || vars.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID || vars.TELEGRAM_CHANNEL_ID }}
+        run: |
+          if [ "${{ github.event.inputs.mode }}" = "seo-authority" ]; then
+            node seo_orchestrator.js --authority
+          elif [ "${{ github.event.inputs.mode }}" = "seo-technical" ]; then
+            node seo_orchestrator.js --technical
+          elif [ "${{ github.event.inputs.mode }}" = "seo-content" ]; then
+            node seo_orchestrator.js --content
+          fi
+
+  # ═══════════════════════════════════════════════════════════
+  # JOB 5: Audit + Fix Pipeline (Manual Dispatch)
+  # ═══════════════════════════════════════════════════════════
+  audit-and-fix:
+    if: >
+      github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'audit-fix'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run SEO Audit
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || vars.GEMINI_API_KEY }}
+          WP_USERNAME: ${{ secrets.WP_USERNAME || vars.WP_USERNAME }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD || vars.WP_APP_PASSWORD }}
+          WP_URL: ${{ secrets.WP_URL || vars.WP_URL }}
+          GSC_CREDENTIALS: ${{ secrets.GSC_CREDENTIALS }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || vars.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || vars.TELEGRAM_CHAT_ID }}
+        run: node audit.js
+
+      - name: Apply SEO Fixes
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || vars.GEMINI_API_KEY }}
+          WP_USERNAME: ${{ secrets.WP_USERNAME || vars.WP_USERNAME }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD || vars.WP_APP_PASSWORD }}
+          WP_URL: ${{ secrets.WP_URL || vars.WP_URL }}
+          GSC_CREDENTIALS: ${{ secrets.GSC_CREDENTIALS }}
+        run: node fixer.js

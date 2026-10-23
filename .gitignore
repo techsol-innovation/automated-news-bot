@@ -1,3 +1,12 @@
 node_modules/
 .env
 *.log
+latest_url.txt
+topical_authority_report.json
+technical_indexing_report.json
+ai_content_strategy_report.json
+seo_master_report.json
+seo_health_check.json
+cleanup_report.json
+final_audit.json
+audit_data.json

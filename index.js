@@ -8,6 +8,9 @@ const FormData = require('form-data');
 const DDG = require('duck-duck-scrape');
 const { TwitterApi } = require('twitter-api-v2');
 
+// David Quaid SEO Integration: Anti-AI Pattern Filter
+const { scanForAIPatterns, autoFixAIPatterns } = require('./ai_content_strategy');
+
 // Initialize Gemini client and model
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 const geminiModel = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
@@ -421,7 +424,12 @@ ${faqBlock}
 - READABILITY CONSTRAINTS: Keep paragraphs strictly to 2-4 sentences max. Aim for an average of 15-20 words per sentence to ensure a Flesch Reading Ease score suitable for a general audience.
 - THE ENGAGEMENT HOOK: Start the very first paragraph with a strong 'hook'—a shocking fact or bold statement. Address the reader directly using 'You'.
 - RICH MICRO-FORMATTING: Break up the text. Use the <strong> tag generously for celebrity names, financial figures, and key locations. Ensure zero fluff.
-- STRICT ANTI-AI TONE: You are strictly forbidden from using robotic AI transition words (e.g., 'In conclusion', 'Moreover'). Write in a punchy, journalistic, conversational tone.
+- STRICT ANTI-AI TONE (David Quaid 44:40-55:12 — ZERO TOLERANCE): Google does NOT penalize AI-generated content — it penalizes detectable AI PATTERNS. You MUST avoid ALL of the following robotic AI markers:
+  * BANNED TRANSITIONS: 'In conclusion', 'Moreover', 'Furthermore', 'It is worth noting', 'In today\'s world', 'In the realm of', 'Delve into', 'Navigate the', 'Tapestry of', 'It\'s no secret that', 'Needless to say', 'Without a doubt', 'At the end of the day', 'When it comes to', 'It goes without saying', 'Let\'s dive in', 'Without further ado', 'Buckle up', 'Stay tuned', 'Game-changer'.
+  * BANNED HEDGING: 'It\'s crucial to', 'Plays a pivotal role', 'A testament to', 'A beacon of', 'The landscape of', 'A plethora of', 'Myriad of', 'Paramount importance', 'Serves as a reminder', 'It remains to be seen', 'Only time will tell'.
+  * INSTEAD USE: Varied, natural, conversational transitions. Mix short punchy sentences (5-8 words) with longer ones (20-25 words). Use rhetorical questions, colloquialisms, and direct reader address ('you', 'your'). Vary paragraph lengths deliberately — some 1 sentence, some 4 sentences.
+  * PARAGRAPH VARIATION: Do NOT make all paragraphs the same length. AI-generated content has suspiciously uniform paragraph sizes. Deliberately vary between 1-sentence punchy paragraphs and 3-4 sentence detailed ones.
+- SIMPLIFIED TITLE METADATA (David Quaid 135:37-139:46): NEVER include the site brand name in the page title. The title must be 100% keyword-relevant. Use Search Console 'Site Name' setting separately for branding.
 - Concreteness & Correctness: Use specific data, clear facts, and sensory words. Ensure flawless grammar.
 - PREMIUM TABLE STYLING: Whenever you generate an HTML table, inject premium inline CSS: <table style="width: 100%; border-collapse: collapse; margin: 25px 0; font-size: 1em; font-family: sans-serif; box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);">. The table header: <thead style="background-color: #2c3e50; color: #ffffff; text-align: left;">. Cells: style="padding: 12px 15px; border-bottom: 1px solid #dddddd;".
 - STRICT ARTICLE TEMPLATE: To maintain a consistent 95+ SEO score, you MUST follow this exact HTML structure:
@@ -1224,6 +1232,15 @@ async function fetchAndScrapeTrends() {
           const article = result.value;
           const { valid } = validateArticle(article, globalIndex);
           if (valid) {
+            // David Quaid Anti-AI Pattern Filter: Scan before publishing
+            const aiScan = scanForAIPatterns(article.content, article.title);
+            if (aiScan.severity === 'critical' || aiScan.severity === 'high') {
+              console.log(`  ↳ [Anti-AI Filter] ⚠️ Article "${article.title}" flagged (Score: ${aiScan.score}/100). Auto-fixing AI patterns...`);
+              article.content = await autoFixAIPatterns(article.content, aiScan.patterns);
+              console.log(`  ↳ [Anti-AI Filter] ✅ AI patterns cleaned for "${article.title}".`);
+            } else if (!aiScan.clean) {
+              console.log(`  ↳ [Anti-AI Filter] Minor AI patterns detected (Score: ${aiScan.score}/100). Acceptable for publishing.`);
+            }
             publishQueue.push(article);
           } else {
             retryQueue.push({ item: originalItem, index: globalIndex });

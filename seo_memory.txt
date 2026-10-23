@@ -29,3 +29,18 @@ Always front-load the primary high-volume brand, franchise, or competitor entiti
 Replace passive, low-intent descriptive words in headlines with high-impact action verbs and specific numbers to maximize click-through rates.
 Establish the explicit relationship, conflict, or transaction between target entities in the headline to capture active user search intent.
 Deploy structured schema markup and visual, comparative data elements on every post to capture rich SERP features and improve on-page dwell time.
+
+# ========================================================
+# DAVID QUAID SEO DIRECTIVES (Added 2026-09-30)
+# Source: David Quaid AdSense Growth Interview
+# ========================================================
+Never publish isolated articles. Build interconnected content clusters with at least 3-5 supporting articles per entity or theme to signal topical expertise to Google.
+Create cornerstone hub pages for every major entity or theme that link out to all related sub-topic articles, distributing PageRank and signaling depth.
+For every entity or person, create individual dedicated pages for each distinct user query (net worth, salary, car collection, real estate, etc.) instead of stuffing all info into one generic page.
+If a high-quality page is stuck as 'Crawled, not indexed' for 14+ days, republish it with a new optimized URL slug to reset Google's crawl priority.
+Strictly remove brand names from all page_title tags. Titles must be 100% keyword-relevant. Use the Search Console 'Site Name' setting for branding instead.
+Avoid detectable AI writing patterns: uniform paragraph lengths, robotic transitions, hedging phrases, and power-word stuffing. Vary sentence and paragraph structure deliberately.
+Build dedicated individual pages for every specific FAQ instead of only embedding FAQs as schema markup. This captures People Also Ask traffic with standalone authority.
+Prioritize rapid publishing velocity and real-world SERP testing over optimizing for unproven metrics like bounce rate, dwell time, or Chrome user data signals.
+Ensure every published article has at least 2-3 internal links pointing to it from related cluster articles to distribute PageRank effectively.
+Never skip heading levels in article structure. Use H2 for main sections, H3 for sub-sections, and ensure the focus keyword appears in at least one H2 heading.
